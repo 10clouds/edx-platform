@@ -20,10 +20,6 @@ from bulk_email.models import BulkEmailFlag
 
 @attr('shard_1')
 @patch('bulk_email.models.html_to_text', Mock(return_value='Mocking CourseEmail.text_message', autospec=True))
-@patch(
-    'bulk_email.models.BulkEmailFlag.current',
-    Mock(return_value=BulkEmailFlag(enabled=True, require_course_email_auth=False))
-)
 class TestOptoutCourseEmails(ModuleStoreTestCase):
     """
     Test that optouts are referenced in sending course email.
@@ -47,6 +43,11 @@ class TestOptoutCourseEmails(ModuleStoreTestCase):
             'course_id': self.course.id.to_deprecated_string(),
             'success': True,
         }
+        BulkEmailFlag.objects.create(enabled=True, require_course_email_auth=False)
+
+    def tearDown(self):
+        super(TestOptoutCourseEmails, self).tearDown()
+        BulkEmailFlag.objects.all().delete()
 
     def navigate_to_email_view(self):
         """Navigate to the instructor dash's email view"""

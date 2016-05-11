@@ -173,11 +173,12 @@ class CourseEmailTemplateTest(TestCase):
 class CourseAuthorizationTest(TestCase):
     """Test the CourseAuthorization model."""
 
-    @patch(
-        'bulk_email.models.BulkEmailFlag.current',
-        Mock(return_value=BulkEmailFlag(enabled=True, require_course_email_auth=True))
-    )
+    def tearDown(self):
+        super(CourseAuthorizationTest, self).tearDown()
+        BulkEmailFlag.objects.all().delete()
+
     def test_creation_auth_on(self):
+        BulkEmailFlag.objects.create(enabled=True, require_course_email_auth=True)
         course_id = SlashSeparatedCourseKey('abc', '123', 'doremi')
         # Test that course is not authorized by default
         self.assertFalse(BulkEmailFlag.feature_enabled(course_id))
@@ -202,11 +203,8 @@ class CourseAuthorizationTest(TestCase):
             "Course 'abc/123/doremi': Instructor Email Not Enabled"
         )
 
-    @patch(
-        'bulk_email.models.BulkEmailFlag.current',
-        Mock(return_value=BulkEmailFlag(enabled=True, require_course_email_auth=False))
-    )
     def test_creation_auth_off(self):
+        BulkEmailFlag.objects.create(enabled=True, require_course_email_auth=False)
         course_id = SlashSeparatedCourseKey('blahx', 'blah101', 'ehhhhhhh')
         # Test that course is authorized by default, since auth is turned off
         self.assertTrue(BulkEmailFlag.feature_enabled(course_id))

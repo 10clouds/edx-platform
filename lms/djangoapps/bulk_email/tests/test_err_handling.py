@@ -38,10 +38,6 @@ class EmailTestException(Exception):
 
 @attr('shard_1')
 @patch('bulk_email.models.html_to_text', Mock(return_value='Mocking CourseEmail.text_message', autospec=True))
-@patch(
-    'bulk_email.models.BulkEmailFlag.current',
-    Mock(return_value=BulkEmailFlag(enabled=True, require_course_email_auth=False))
-)
 class TestEmailErrors(ModuleStoreTestCase):
     """
     Test that errors from sending email are handled properly.
@@ -64,6 +60,11 @@ class TestEmailErrors(ModuleStoreTestCase):
             'course_id': self.course.id.to_deprecated_string(),
             'success': True,
         }
+        BulkEmailFlag.objects.create(enabled=True, require_course_email_auth=False)
+
+    def tearDown(self):
+        super(TestEmailErrors, self).tearDown()
+        BulkEmailFlag.objects.all().delete()
 
     @patch('bulk_email.tasks.get_connection', autospec=True)
     @patch('bulk_email.tasks.send_course_email.retry')

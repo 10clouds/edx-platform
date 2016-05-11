@@ -79,10 +79,6 @@ class EmailSendFromDashboardTestCase(SharedModuleStoreTestCase):
         """
         self.client.login(username=user.username, password="test")
 
-    @patch(
-        'bulk_email.models.BulkEmailFlag.current',
-        Mock(return_value=BulkEmailFlag(enabled=True, require_course_email_auth=False))
-    )
     def goto_instructor_dash_email_view(self):
         """
         Goes to the instructor dashboard to verify that the email section is
@@ -107,6 +103,7 @@ class EmailSendFromDashboardTestCase(SharedModuleStoreTestCase):
 
     def setUp(self):
         super(EmailSendFromDashboardTestCase, self).setUp()
+        BulkEmailFlag.objects.create(enabled=True, require_course_email_auth=False)
         self.create_staff_and_instructor()
         self.create_students()
 
@@ -124,13 +121,13 @@ class EmailSendFromDashboardTestCase(SharedModuleStoreTestCase):
             'success': True,
         }
 
+    def tearDown(self):
+        super(EmailSendFromDashboardTestCase, self).tearDown()
+        BulkEmailFlag.objects.all().delete()
+
 
 @attr('shard_1')
 @patch('bulk_email.models.html_to_text', Mock(return_value='Mocking CourseEmail.text_message', autospec=True))
-@patch(
-    'bulk_email.models.BulkEmailFlag.current',
-    Mock(return_value=BulkEmailFlag(enabled=True, require_course_email_auth=False))
-)
 class TestEmailSendFromDashboardMockedHtmlToText(EmailSendFromDashboardTestCase):
     """
     Tests email sending with mocked html_to_text.
@@ -139,16 +136,16 @@ class TestEmailSendFromDashboardMockedHtmlToText(EmailSendFromDashboardTestCase)
         """
         Test response when email is disabled for course.
         """
+        BulkEmailFlag.objects.create(enabled=True, require_course_email_auth=True)
         test_email = {
             'action': 'Send email',
             'send_to': 'myself',
             'subject': 'test subject for myself',
             'message': 'test message for myself'
         }
-        with patch.object(BulkEmailFlag, 'current', return_value=BulkEmailFlag(enabled=False)):
-            response = self.client.post(self.send_mail_url, test_email)
-            # We should get back a HttpResponseForbidden (status code 403)
-            self.assertContains(response, "Email is not enabled for this course.", status_code=403)
+        response = self.client.post(self.send_mail_url, test_email)
+        # We should get back a HttpResponseForbidden (status code 403)
+        self.assertContains(response, "Email is not enabled for this course.", status_code=403)
 
     @patch('bulk_email.models.html_to_text', Mock(return_value='Mocking CourseEmail.text_message', autospec=True))
     def test_send_to_self(self):
@@ -409,10 +406,6 @@ class TestEmailSendFromDashboardMockedHtmlToText(EmailSendFromDashboardTestCase)
 
 @attr('shard_1')
 @skipIf(os.environ.get("TRAVIS") == 'true', "Skip this test in Travis CI.")
-@patch(
-    'bulk_email.models.BulkEmailFlag.current',
-    Mock(return_value=BulkEmailFlag(enabled=True, require_course_email_auth=False))
-)
 class TestEmailSendFromDashboard(EmailSendFromDashboardTestCase):
     """
     Tests email sending without mocked html_to_text.

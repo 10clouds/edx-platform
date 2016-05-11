@@ -6,7 +6,6 @@ that the view is conditionally available when Course Auth is turned on.
 """
 from django.conf import settings
 from django.core.urlresolvers import reverse
-from mock import Mock, patch
 from nose.plugins.attrib import attr
 from opaque_keys.edx.locations import SlashSeparatedCourseKey
 
@@ -41,14 +40,15 @@ class TestNewInstructorDashboardEmailViewMongoBacked(SharedModuleStoreTestCase):
         instructor = AdminFactory.create()
         self.client.login(username=instructor.username, password="test")
 
+    def tearDown(self):
+        super(TestNewInstructorDashboardEmailViewMongoBacked, self).tearDown()
+        BulkEmailFlag.objects.all().delete()
+
     # In order for bulk email to work, we must have both the BulkEmailFlag.is_enabled()
     # set to True and for the course to be Mongo-backed.
     # The flag is enabled and the course is Mongo-backed (should work)
-    @patch(
-        'bulk_email.models.BulkEmailFlag.current',
-        Mock(return_value=BulkEmailFlag(enabled=True, require_course_email_auth=False))
-    )
     def test_email_flag_true_mongo_true(self):
+        BulkEmailFlag.objects.create(enabled=True, require_course_email_auth=False)
         # Assert that instructor email is enabled for this course - since REQUIRE_COURSE_EMAIL_AUTH is False,
         # all courses should be authorized to use email.
         self.assertTrue(BulkEmailFlag.feature_enabled(self.course.id))
@@ -60,22 +60,16 @@ class TestNewInstructorDashboardEmailViewMongoBacked(SharedModuleStoreTestCase):
         self.assertTrue(send_to_label in response.content)
         self.assertEqual(response.status_code, 200)
 
-    @patch(
-        'bulk_email.models.BulkEmailFlag.current',
-        Mock(return_value=BulkEmailFlag(enabled=False))
-    )
     # The course is Mongo-backed but the flag is disabled (should not work)
     def test_email_flag_false_mongo_true(self):
+        BulkEmailFlag.objects.create(enabled=False)
         # Assert that the URL for the email view is not in the response
         response = self.client.get(self.url)
         self.assertFalse(self.email_link in response.content)
 
     # Flag is enabled, but we require course auth and haven't turned it on for this course
-    @patch(
-        'bulk_email.models.BulkEmailFlag.current',
-        Mock(return_value=BulkEmailFlag(enabled=True, require_course_email_auth=True))
-    )
     def test_course_not_authorized(self):
+        BulkEmailFlag.objects.create(enabled=True, require_course_email_auth=True)
         # Assert that instructor email is not enabled for this course
         self.assertFalse(BulkEmailFlag.feature_enabled(self.course.id))
         # Assert that the URL for the email view is not in the response
@@ -83,11 +77,8 @@ class TestNewInstructorDashboardEmailViewMongoBacked(SharedModuleStoreTestCase):
         self.assertFalse(self.email_link in response.content)
 
     # Flag is enabled, we require course auth and turn it on for this course
-    @patch(
-        'bulk_email.models.BulkEmailFlag.current',
-        Mock(return_value=BulkEmailFlag(enabled=True, require_course_email_auth=True))
-    )
     def test_course_authorized(self):
+        BulkEmailFlag.objects.create(enabled=True, require_course_email_auth=True)
         # Assert that instructor email is not enabled for this course
         self.assertFalse(BulkEmailFlag.feature_enabled(self.course.id))
         # Assert that the URL for the email view is not in the response
@@ -105,11 +96,8 @@ class TestNewInstructorDashboardEmailViewMongoBacked(SharedModuleStoreTestCase):
         self.assertTrue(self.email_link in response.content)
 
     # Flag is disabled, but course is authorized
-    @patch(
-        'bulk_email.models.BulkEmailFlag.current',
-        Mock(return_value=BulkEmailFlag(enabled=False, require_course_email_auth=True))
-    )
     def test_course_authorized_feature_off(self):
+        BulkEmailFlag.objects.create(enabled=False, require_course_email_auth=True)
         # Authorize the course to use email
         cauth = CourseAuthorization(course_id=self.course.id, email_enabled=True)
         cauth.save()
@@ -152,21 +140,19 @@ class TestNewInstructorDashboardEmailViewXMLBacked(SharedModuleStoreTestCase):
         # URL for email view
         self.email_link = '<a href="" data-section="send_email">Email</a>'
 
+    def tearDown(self):
+        super(TestNewInstructorDashboardEmailViewXMLBacked, self).tearDown()
+        BulkEmailFlag.objects.all().delete()
+
     # The flag is enabled, and since REQUIRE_COURSE_EMAIL_AUTH is False, all courses should
     # be authorized to use email. But the course is not Mongo-backed (should not work)
-    @patch(
-        'bulk_email.models.BulkEmailFlag.current',
-        Mock(return_value=BulkEmailFlag(enabled=True, require_course_email_auth=False))
-    )
     def test_email_flag_true_mongo_false(self):
+        BulkEmailFlag.objects.create(enabled=True, require_course_email_auth=False)
         response = self.client.get(self.url)
         self.assertFalse(self.email_link in response.content)
 
     # The flag is disabled and the course is not Mongo-backed (should not work)
-    @patch(
-        'bulk_email.models.BulkEmailFlag.current',
-        Mock(return_value=BulkEmailFlag(enabled=False, require_course_email_auth=False))
-    )
     def test_email_flag_false_mongo_false(self):
+        BulkEmailFlag.objects.create(enabled=False, require_course_email_auth=False)
         response = self.client.get(self.url)
         self.assertFalse(self.email_link in response.content)

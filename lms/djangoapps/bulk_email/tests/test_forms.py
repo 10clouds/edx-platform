@@ -3,7 +3,6 @@
 Unit tests for bulk-email-related forms.
 """
 from django.conf import settings
-from mock import Mock, patch
 from nose.plugins.attrib import attr
 
 from bulk_email.models import CourseEmailTemplate, BulkEmailFlag
@@ -16,10 +15,6 @@ from xmodule.modulestore import ModuleStoreEnum
 
 
 @attr('shard_1')
-@patch(
-    'bulk_email.models.BulkEmailFlag.current',
-    Mock(return_value=BulkEmailFlag(enabled=True, require_course_email_auth=True))
-)
 class CourseAuthorizationFormTest(ModuleStoreTestCase):
     """Test the CourseAuthorizationAdminForm form for Mongo-backed courses."""
 
@@ -27,6 +22,11 @@ class CourseAuthorizationFormTest(ModuleStoreTestCase):
         super(CourseAuthorizationFormTest, self).setUp()
         course_title = u"ẗëṡẗ title ｲ乇丂ｲ ﾶ乇丂丂ﾑg乇 ｷo尺 ﾑﾚﾚ тэѕт мэѕѕаБэ"
         self.course = CourseFactory.create(display_name=course_title)
+        BulkEmailFlag.objects.create(enabled=True, require_course_email_auth=True)
+
+    def tearDown(self):
+        super(CourseAuthorizationFormTest, self).tearDown()
+        BulkEmailFlag.objects.all().delete()
 
     def test_authorize_mongo_course(self):
         # Initially course shouldn't be authorized
