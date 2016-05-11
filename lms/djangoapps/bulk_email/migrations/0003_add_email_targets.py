@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
             name='Target',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('target_type', models.CharField(default=b'myself', max_length=64, choices=[(b'myself', b'Myself'), (b'staff', b'Staff and instructors'), (b'learners', b'All students'), (b'cohort', b'Send to a specific cohort'), (b'all', b'All')])),
+                ('target_type', models.CharField(max_length=64, choices=[(b'myself', b'Myself'), (b'staff', b'Staff and instructors'), (b'learners', b'All students'), (b'cohort', b'Send to a specific cohort'), (b'all', b'All')])),
             ],
         ),
         migrations.AlterField(
