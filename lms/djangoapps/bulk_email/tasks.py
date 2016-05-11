@@ -37,7 +37,7 @@ from django.core.urlresolvers import reverse
 
 from bulk_email.models import (
     CourseEmail, Optout,
-    SEND_TO_MYSELF, SEND_TO_ALL, TO_OPTIONS,
+    SEND_TO_MYSELF, SEND_TO_ALL, EMAIL_TARGETS,
     SEND_TO_STAFF,
 )
 from courseware.courses import get_course

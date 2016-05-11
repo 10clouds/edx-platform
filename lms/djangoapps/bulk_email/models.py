@@ -32,15 +32,15 @@ from util.query import use_read_replica_if_available
 
 log = logging.getLogger(__name__)
 
-# Bulk email to_options - the send to options that users can
+# Bulk email targets - the send to options that users can
 # select from when they send email.
 SEND_TO_MYSELF = 'myself'
 SEND_TO_STAFF = 'staff'
 SEND_TO_LEARNERS = 'learners'
 SEND_TO_COHORT = 'cohort'
 SEND_TO_ALL = 'all'
-TO_OPTIONS = [SEND_TO_MYSELF, SEND_TO_STAFF, SEND_TO_LEARNERS, SEND_TO_COHORT, SEND_TO_ALL]
-TO_OPTION_DESCRIPTIONS = ['Myself', 'Staff and instructors', 'All students', 'Send to a specific cohort', 'All']
+EMAIL_TARGETS = [SEND_TO_MYSELF, SEND_TO_STAFF, SEND_TO_LEARNERS, SEND_TO_COHORT, SEND_TO_ALL]
+EMAIL_TARGET_DESCRIPTIONS = ['Myself', 'Staff and instructors', 'All students', 'Send to a specific cohort', 'All']
 
 class Email(models.Model):
     """
@@ -63,10 +63,10 @@ class Target(models.Model):
     """
     A way to refer to a particular group (within a course) as a "Send to:" target.
     """
-    # choices for to_option field below
-    TO_OPTION_CHOICES = zip(TO_OPTIONS, TO_OPTION_DESCRIPTIONS)
+    # choices for target field below
+    EMAIL_TARGET_CHOICES = zip(EMAIL_TARGETS, EMAIL_TARGET_DESCRIPTIONS)
 
-    target_type = models.CharField(max_length=64, choices=TO_OPTION_CHOICES)
+    target_type = models.CharField(max_length=64, choices=EMAIL_TARGET_CHOICES)
 
     # base querysets, used by several child class in get_user
     # TODO - need course_id for these
@@ -84,7 +84,7 @@ class Target(models.Model):
     def __init__(self, *args, **kwargs):
         super(Target, self).__init__(*args, **kwargs)
 
-        instance_type = TO_OPTION_CLASS_MAP[self.target_type]
+        instance_type = EMAIL_TARGET_CLASS_MAP[self.target_type]
         if not isinstance(self, instance_type):
             raise ValidationError(
                 "Target type {} may only be instatiated as an instance of {}".format(
@@ -189,8 +189,8 @@ class AllTarget(Target):
         ]
         return recipient_qsets
 
-TO_OPTION_CLASSES = [MyselfTarget, StaffTarget, LearnersTarget, CohortTarget, AllTarget]
-TO_OPTION_CLASS_MAP = dict(zip(TO_OPTIONS, TO_OPTION_CLASSES))
+EMAIL_TARGET_CLASSES = [MyselfTarget, StaffTarget, LearnersTarget, CohortTarget, AllTarget]
+EMAIL_TARGET_CLASS_MAP = dict(zip(EMAIL_TARGETS, EMAIL_TARGET_CLASSES))
 
 
 class CourseEmail(Email):
@@ -202,7 +202,6 @@ class CourseEmail(Email):
 
     course_id = CourseKeyField(max_length=255, db_index=True)
     targets = models.ManyToManyField(Target)
-    to_option = models.CharField(max_length=64, choices=Target.TO_OPTION_CHOICES, default=SEND_TO_MYSELF)
     template_name = models.CharField(null=True, max_length=255)
     from_addr = models.CharField(null=True, max_length=255)
 
@@ -224,7 +223,7 @@ class CourseEmail(Email):
         new_targets = []
         for target in targets:
             # Ensure our desired target exists
-            desired_target_class = TO_OPTION_CLASS_MAP.get(target, None)
+            desired_target_class = EMAIL_TARGET_CLASS_MAP.get(target, None)
             if desired_target_class is None:
                 fmt = 'Course email being sent to unrecognized target: "{target}" for "{course}", subject "{subject}"'
                 msg = fmt.format(target=target, course=course_id, subject=subject)

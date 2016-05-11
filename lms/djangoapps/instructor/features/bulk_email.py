@@ -62,7 +62,7 @@ def make_populated_course(step):  # pylint: disable=unused-argument
 
 # Dictionary mapping a description of the email recipient
 # to the corresponding <option> value in the UI.
-SEND_TO_OPTIONS = {
+TARGET_OPTIONS = {
     'myself': 'myself',
     'course staff': 'staff',
     'students, staff, and instructors': 'all'
@@ -101,7 +101,7 @@ def when_i_send_an_email(step, recipient):  # pylint: disable=unused-argument
 
     # Check that the recipient is valid
     assert_in(
-        recipient, SEND_TO_OPTIONS,
+        recipient, TARGET_OPTIONS,
         msg="Invalid recipient: {}".format(recipient)
     )
 
@@ -121,7 +121,7 @@ def when_i_send_an_email(step, recipient):  # pylint: disable=unused-argument
     world.css_click('a[data-section="send_email"]')
 
     # Select the recipient
-    world.select_option('send_to', SEND_TO_OPTIONS[recipient])
+    world.select_option('send_to', TARGET_OPTIONS[recipient])
 
     # Enter subject and message
     world.css_fill('input#id_subject', 'Hello')
@@ -149,7 +149,7 @@ UNSUBSCRIBE_MSG = 'To stop receiving email like this'
 def then_the_email_is_sent(step, recipient):  # pylint: disable=unused-argument
     # Check that the recipient is valid
     assert_in(
-        recipient, SEND_TO_OPTIONS,
+        recipient, TARGET_OPTIONS,
         msg="Invalid recipient: {}".format(recipient)
     )
 

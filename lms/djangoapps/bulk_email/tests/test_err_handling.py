@@ -198,7 +198,7 @@ class TestEmailErrors(ModuleStoreTestCase):
         email.save()
         entry = InstructorTask.create(self.course.id, "task_type", "task_key", "task_input", self.instructor)
         task_input = {"email_id": email.id}
-        with self.assertRaisesRegexp(Exception, 'Unexpected bulk email TO_OPTION found: IDONTEXIST'):
+        with self.assertRaisesRegexp(Exception, 'Unexpected bulk email EMAIL_TARGET found: IDONTEXIST'):
             perform_delegate_email_batches(entry.id, self.course.id, task_input, "action_name")
 
     def test_wrong_course_id_in_task(self):
