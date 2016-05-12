@@ -8,7 +8,7 @@ from courseware.courses import get_studio_url
 from openedx.core.djangoapps.course_groups.partition_scheme import get_cohorted_user_partition
 %>
 
-
+<h2 id="header-${section_data['section_key']}">${_("Cohort Management")}</h2>
 <div class="cohort-management"
      data-cohorts_url="${section_data['cohorts_url']}"
      data-upload_cohorts_csv_url="${section_data['upload_cohorts_csv_url']}"

@@ -5,7 +5,7 @@ from django.utils.translation import ugettext as _
 from courseware.courses import get_studio_url
 from openedx.core.djangoapps.course_groups.partition_scheme import get_cohorted_user_partition
 %>
-
+<h2 id="header-${section_data['section_key']}">${_("Membership")}</h2>
 <script type="text/template" id="member-list-widget-template">
   <div class="member-list-widget">
     <div class="header">
@@ -33,7 +33,7 @@ from openedx.core.djangoapps.course_groups.partition_scheme import get_cohorted_
 </script>
 
 <div class="batch-enrollment membership-section">
-  <h2> ${_("Batch Enrollment")} </h2>
+  <h3 class="hd hd-2">${_("Batch Enrollment")}</h3>
   <p>
     <label for="student-ids">
       ${_("Enter email addresses and/or usernames separated by new lines or commas.")}
@@ -87,7 +87,7 @@ from openedx.core.djangoapps.course_groups.partition_scheme import get_cohorted_
   <hr class="divider" />
 
   <div class="auto_enroll auto_enroll_csv">
-    <h2> ${_("Register/Enroll Students")} </h2>
+    <h3 class="hd hd-2">${_("Register/Enroll Students")}</h3>
     <p>
     ${_("To register and enroll a list of users in this course, choose a CSV file that contains the following columns in this exact order: email, username, name, and country. Please include one student per row and do not include any headers, footers, or blank lines.")}
     </p>
@@ -111,7 +111,7 @@ from openedx.core.djangoapps.course_groups.partition_scheme import get_cohorted_
 
 %if section_data['access']['instructor']:
 <div class="batch-beta-testers membership-section">
-  <h2> ${_("Batch Beta Tester Addition")} </h2>
+  <h3 class="hd hd-2">${_("Batch Beta Tester Addition")}</h3>
   <p>
     <label for="student-ids-for-beta">
       ${_("Enter email addresses and/or usernames separated by new lines or commas.")}<br/>
@@ -157,7 +157,7 @@ from openedx.core.djangoapps.course_groups.partition_scheme import get_cohorted_
 
 <div class="member-lists-management membership-section" aria-live="polite">
   ## Translators: an "Administration List" is a list, such as Course Staff, that users can be added to.
-  <h2> ${_("Course Team Management")} </h2>
+  <h3 class="hd hd-2">${_("Course Team Management")}</h3>
 
   <div class="request-response-error"></div>
 
