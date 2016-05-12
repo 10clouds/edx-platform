@@ -18,7 +18,7 @@ from openedx.core.lib.cache_utils import memoized
 from openedx.core.lib.gating import api as gating_api
 from courseware import courses
 from course_blocks.api import get_course_in_cache, get_course_blocks
-from courseware.access import has_access
+# from course_blocks.transformers.grades import GradesBlockTransformer
 from courseware.model_data import FieldDataCache, ScoresClient
 from openedx.core.djangoapps.signals.signals import GRADES_UPDATED
 from student.models import anonymous_id_for_user

@@ -40,7 +40,7 @@ class BlockStructureCache(object):
         """
         data_to_cache = (
             block_structure._block_relations,
-            block_structure._transformer_data,
+            block_structure.transformer_data,
             block_structure._block_data_map
         )
         zp_data_to_cache = zpickle(data_to_cache)

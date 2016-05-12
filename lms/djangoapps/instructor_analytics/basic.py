@@ -23,7 +23,7 @@ from courseware.models import StudentModule
 from certificates.models import GeneratedCertificate
 from django.db.models import Count
 from certificates.models import CertificateStatuses
-from courseware.grades import grading_context
+from courseware.grades import grading_context_for_course
 
 
 STUDENT_FEATURES = ('id', 'username', 'first_name', 'last_name', 'is_staff', 'email')
@@ -480,7 +480,7 @@ def dump_grading_context(course):
     msg += hbar
     msg += "Listing grading context for course %s\n" % course.id.to_deprecated_string()
 
-    gcontext = grading_context(course)
+    gcontext = grading_context_for_course(course)
     msg += "graded sections:\n"
 
     msg += '%s\n' % gcontext['all_graded_sections'].keys()

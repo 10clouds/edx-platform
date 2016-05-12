@@ -272,7 +272,46 @@ class BlockStructure(object):
         block_relations[usage_key] = _BlockRelations()
 
 
-class _BlockData(object):
+class FieldData(object):
+    """
+    Data structure to encapsulate collected fields.
+    """
+    def __init__(self):
+        # Map of xblock field name to the field's value for this block.
+        # dict {string: any picklable type}
+        self.fields = {}
+
+    def __getattr__(self, field_name):
+        if self._is_own_field(field_name):
+            return super(FieldData, self).__getattr__(field_name)
+        try:
+            return self.fields[field_name]
+        except KeyError:
+            raise AttributeError("Field {0} does not exist".format(field_name))
+
+
+    def __setattr__(self, field_name, field_value):
+        if self._is_own_field(field_name):
+            return super(FieldData, self).__setattr__(field_name, field_value)
+        else:
+            self.fields[field_name] = field_value
+
+    def _is_own_field(self, field_name):
+        """
+        Returns whether the given field_name is the name of an
+        actual field of this class.
+        """
+        return field_name in ['fields']
+
+
+class TransformerData(FieldData):
+    """
+    Data structure to encapsulate collected data for a transformer.
+    """
+    pass
+
+
+class BlockData(object):
     """
     Data structure to encapsulate collected data for a single block.
     """
@@ -281,29 +320,10 @@ class _BlockData(object):
         self.location = usage_key
 
         # Map of xblock field name to the field's value for this block.
-        # dict {string: any picklable type}
-        self.xblock_fields = {}
+        self.xblock_fields = FieldData()
 
-        # Map of transformer name to the transformer's data for this
-        # block.
-        # defaultdict {string: dict}
-        self.transformer_data = defaultdict(dict)
-
-    instance_fields = ('xblock_fields', 'transformer_data')
-
-    def __getattr__(self, field_name):
-        if field_name in self.instance_fields:
-            return super(_BlockData, self).__getattr__(field_name)
-        try:
-            return self.xblock_fields[field_name]
-        except KeyError:
-            raise AttributeError("Field {0} does not exist".format(field_name))
-
-    def __setattr__(self, field_name, field_value):
-        if field_name in self.instance_fields:
-            return super(_BlockData, self).__setattr__(field_name, field_value)
-        else:
-            self.xblock_fields[field_name] = field_value
+        # Map of transformer name to its block-specific data.
+        self.transformer_data = defaultdict(TransformerData)
 
 
 class BlockStructureBlockData(BlockStructure):
@@ -316,30 +336,29 @@ class BlockStructureBlockData(BlockStructure):
 
         # Map of a block's usage key to its collected data, including
         # its xBlock fields and block-specific transformer data.
-        # dict {UsageKey: _BlockData}
+        # dict {UsageKey: BlockData}
         self._block_data_map = {}
 
         # Map of a transformer's name to its non-block-specific data.
-        # defaultdict {string: dict}
-        self._transformer_data = defaultdict(dict)
+        self.transformer_data = defaultdict(TransformerData)
 
     def iteritems(self):
         """
-        Returns iterator of (UsageKey, _BlockData) pairs for all
+        Returns iterator of (UsageKey, BlockData) pairs for all
         blocks in the BlockStructure.
         """
         return self._block_data_map.iteritems()
 
     def itervalues(self):
         """
-        Returns iterator of _BlockData for all blocks in the
+        Returns iterator of BlockData for all blocks in the
         BlockStructure.
         """
         return self._block_data_map.itervalues()
 
     def __getitem__(self, usage_key):
         """
-        Returns the _BlockData associated with the given key.
+        Returns the BlockData associated with the given key.
         """
         return self._block_data_map.get(usage_key)
 
@@ -374,7 +393,7 @@ class BlockStructureBlockData(BlockStructure):
             key (string) - A dictionary key to the transformer's data
                 that is requested.
         """
-        return self._transformer_data.get(transformer.name(), {}).get(key, default)
+        return getattr(self.transformer_data.get(transformer.name(), {}), key, default)
 
     def set_transformer_data(self, transformer, key, value):
         """
@@ -390,7 +409,7 @@ class BlockStructureBlockData(BlockStructure):
             value (any picklable type) - The value to associate with the
                 given key for the given transformer's data.
         """
-        self._transformer_data[transformer.name()][key] = value
+        setattr(self.transformer_data[transformer.name()], key, value)
 
     def get_transformer_block_field(self, usage_key, transformer, key, default=None):
         """
@@ -412,7 +431,7 @@ class BlockStructureBlockData(BlockStructure):
                 entry is not found.
         """
         transformer_data = self.get_transformer_block_data(usage_key, transformer)
-        return transformer_data.get(key, default)
+        return getattr(transformer_data, key, default)
 
     def set_transformer_block_field(self, usage_key, transformer, key, value):
         """
@@ -432,7 +451,11 @@ class BlockStructureBlockData(BlockStructure):
                 given key for the given transformer's data for the
                 requested block.
         """
-        self._get_or_create_block(usage_key).transformer_data[transformer.name()][key] = value
+        setattr(
+            self._get_or_create_block(usage_key).transformer_data[transformer.name()],
+            key,
+            value,
+        )
 
     def get_transformer_block_data(self, usage_key, transformer):
         """
@@ -575,7 +598,7 @@ class BlockStructureBlockData(BlockStructure):
         try:
             return self._block_data_map[usage_key]
         except KeyError:
-            block_data = _BlockData(usage_key)
+            block_data = BlockData(usage_key)
             self._block_data_map[usage_key] = block_data
             return block_data
 
@@ -662,7 +685,7 @@ class BlockStructureModulestoreData(BlockStructureBlockData):
         value for the given field name.
 
         Arguments:
-            block_data (_BlockData) - A BlockStructure BlockData
+            block_data (BlockData) - A BlockStructure BlockData
                 object.
 
             xblock (XBlock) - An instantiated XBlock object whose
@@ -673,4 +696,4 @@ class BlockStructureModulestoreData(BlockStructureBlockData):
                 being collected and stored.
         """
         if hasattr(xblock, field_name):
-            block_data.xblock_fields[field_name] = getattr(xblock, field_name)
+            setattr(block_data.xblock_fields, field_name, getattr(xblock, field_name))
