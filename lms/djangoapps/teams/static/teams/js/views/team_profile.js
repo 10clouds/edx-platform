@@ -16,6 +16,7 @@
                 events: {
                     'click .leave-team-link': 'leaveTeam'
                 },
+                
                 initialize: function (options) {
                     this.teamEvents = options.teamEvents;
                     this.context = options.context;

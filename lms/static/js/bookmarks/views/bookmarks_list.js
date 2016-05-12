@@ -56,7 +56,7 @@
                 this.hideErrorMessage();
                 this.showBookmarksContainer();
 
-                this.collection.goTo(this.defaultPage).done(function () {
+                this.collection.getPage(this.defaultPage).done(function () {
                     view.render();
                     view.focusBookmarksElement();
                 }).fail(function () {

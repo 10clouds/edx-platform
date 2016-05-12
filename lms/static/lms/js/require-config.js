@@ -132,10 +132,6 @@
                 deps: ["jquery", "tinymce"],
                 exports: "jQuery.fn.tinymce"
             },
-            "backbone.paginator": {
-                deps: ["backbone"],
-                exports: "Backbone.Paginator"
-            },
             "backbone-super": {
                 deps: ["backbone"]
             },

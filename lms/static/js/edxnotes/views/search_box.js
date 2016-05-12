@@ -102,7 +102,7 @@ define([
             if (args) {
                 this.options.search.apply(this, args);
                 this.logger.emit('edx.course.student_notes.searched', {
-                    'number_of_results': args[0].totalCount,
+                    'number_of_results': args[0].getTotalRecords(),
                     'search_string': args[1]
                 });
             } else {
@@ -153,7 +153,7 @@ define([
                 url: this.el.action
             });
 
-            return this.collection.setPage(1);
+            return this.collection.getPage(1);
         }
     });
 

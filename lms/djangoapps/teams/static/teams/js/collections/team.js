@@ -3,29 +3,31 @@
     define(['teams/js/collections/base', 'teams/js/models/team', 'gettext'],
         function(BaseCollection, TeamModel, gettext) {
             var TeamCollection = BaseCollection.extend({
-                sortField: 'last_activity_at',
+                model: TeamModel,
+                
+                state: {
+                    sortKey: 'last_activity_at'
+                },
 
-                initialize: function(teams, options) {
-                    this.url = options.url;
-                    var self = this;
-                    BaseCollection.prototype.initialize.call(this, options);
+                queryParams: {
+                    topic_id: function () {
+                        return this.options.topic_id;
+                    },
+                    expand: 'user',
+                    course_id: function () {
+                        return encodeURIComponent(this.options.course_id);
+                    },
+                    order_by: function () {
+                        return this.options.searchString ? '' : this.sortField;
+                    }
+                },
 
-                    this.server_api = _.extend(
-                        this.server_api,
-                        {
-                            topic_id: this.topic_id = options.topic_id,
-                            expand: 'user',
-                            course_id: function () { return encodeURIComponent(self.course_id); },
-                            order_by: function () { return self.searchString ? '' : this.sortField; }
-                        }
-                    );
-                    delete this.server_api.sort_order; // Sort order is not specified for the Team API
+                constructor: function(teams, options) {
+                    BaseCollection.prototype.constructor.call(this, teams, options);
 
                     this.registerSortableField('last_activity_at', gettext('last activity'));
                     this.registerSortableField('open_slots', gettext('open slots'));
-                },
-
-                model: TeamModel
+                }
             });
             return TeamCollection;
         });

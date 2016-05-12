@@ -121,7 +121,7 @@
                             course_id: this.context.courseID,
                             parse: true
                         }
-                    ).bootstrap();
+                    );
 
                     this.topicsView = new TopicsView({
                         router: this.router,
@@ -336,7 +336,7 @@
                                     per_page: 10
                                 });
                                 view.teamsCollection = collection;
-                                collection.goTo(1)
+                                collection.getPage(1)
                                     .done(function() {
                                         var teamsView = view.createTeamsListView({
                                             topic: topic,

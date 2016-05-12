@@ -3,16 +3,16 @@
     define(['paging-collection'],
         function(PagingCollection) {
             var BaseCollection = PagingCollection.extend({
-                initialize: function(options) {
+                constructor: function (models, options) {
+                    this.options = options;
                     this.url = options.url;
-
-                    PagingCollection.prototype.initialize.call(this);
+                    this.state.perPage = options.per_page;
 
                     this.course_id = options.course_id;
-                    this.perPage = options.per_page;
-
                     this.teamEvents = options.teamEvents;
                     this.teamEvents.bind('teams:update', this.onUpdate, this);
+                    
+                    PagingCollection.prototype.constructor.call(this, models, options);
                 },
 
                 onUpdate: function(event) {

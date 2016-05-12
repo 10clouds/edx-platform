@@ -51,7 +51,8 @@
 
             createFooterView: function() {
                 return new PagingFooter({
-                    collection: this.collection, hideWhenOnePage: true,
+                    collection: this.collection,
+                    hideWhenOnePage: true,
                     paginationLabel: this.paginationLabel
                 });
             },
