@@ -19,7 +19,7 @@
                         return this.options.course_id;
                     },
                     order_by: function () {
-                        return this.options.searchString ? '' : this.sortField;
+                        return this.options.searchString ? '' : this.state.sortKey;
                     },
                     text_search: function () { return this.options.searchString || ''; }
                 },
