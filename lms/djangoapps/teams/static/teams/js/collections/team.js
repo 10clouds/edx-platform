@@ -6,7 +6,8 @@
                 model: TeamModel,
                 
                 state: {
-                    sortKey: 'last_activity_at'
+                    sortKey: 'last_activity_at',
+                    order: null
                 },
 
                 queryParams: {
@@ -15,14 +16,17 @@
                     },
                     expand: 'user',
                     course_id: function () {
-                        return encodeURIComponent(this.options.course_id);
+                        return this.options.course_id;
                     },
                     order_by: function () {
                         return this.options.searchString ? '' : this.sortField;
-                    }
+                    },
+                    text_search: function () { return this.options.searchString || ''; }
                 },
 
                 constructor: function(teams, options) {
+                    this.state = _.extend({}, TeamCollection.prototype.state, this.state);
+                    this.queryParams = _.extend({}, TeamCollection.prototype.queryParams, this.queryParams);
                     BaseCollection.prototype.constructor.call(this, teams, options);
 
                     this.registerSortableField('last_activity_at', gettext('last activity'));

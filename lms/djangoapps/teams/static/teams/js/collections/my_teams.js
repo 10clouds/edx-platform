@@ -5,7 +5,12 @@
             queryParams: {
                 username: function () {
                     return this.options.username;
-                }
+                },
+                text_search: function () {
+                    return this.searchString || '';
+                },
+                totalPages: null,
+                totalRecords: null
             },
 
             constructor: function (teams, options) {

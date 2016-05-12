@@ -6,7 +6,9 @@
         function (gettext, $, _, ListView, BadgeView, badgePlaceholder) {
             var BadgeListView = ListView.extend({
                 tagName: 'div',
+                
                 template: _.template(badgePlaceholder),
+                
                 renderCollection: function () {
                     this.$el.empty();
                     var self = this;

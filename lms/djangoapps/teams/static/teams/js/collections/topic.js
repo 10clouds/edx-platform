@@ -11,7 +11,10 @@
                 },
 
                 queryParams: {
-                    course_id: function () { return this.course_id; }
+                    course_id: function () { return this.course_id; },
+                    text_search: function () { return this.searchString || ''; },
+                    totalPages: null,
+                    totalRecords: null
                 },
 
                 constructor: function(topics, options) {

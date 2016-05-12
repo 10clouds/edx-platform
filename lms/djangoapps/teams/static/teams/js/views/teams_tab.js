@@ -336,16 +336,15 @@
                                     per_page: 10
                                 });
                                 view.teamsCollection = collection;
-                                collection.getPage(1)
-                                    .done(function() {
-                                        var teamsView = view.createTeamsListView({
-                                            topic: topic,
-                                            collection: collection,
-                                            breadcrumbs: view.createBreadcrumbs(),
-                                            showSortControls: true
+                                collection.setPage(1).then(function () {
+                                    var teamsView = view.createTeamsListView({
+                                        topic: topic,
+                                        collection: collection,
+                                        breadcrumbs: view.createBreadcrumbs(),
+                                        showSortControls: true
                                         });
-                                        deferred.resolve(teamsView);
-                                    });
+                                    deferred.resolve(teamsView);
+                                });
                             });
                     }
                     return deferred.promise();

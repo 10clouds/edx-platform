@@ -64,7 +64,6 @@ define([
             createMockTeamsResponse(responseOptions),
             _.extend({
                 state: {
-                    perPage: 2,
                     pageSize: 5
                 },
                 teamEvents: teamEvents,
