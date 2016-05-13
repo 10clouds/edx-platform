@@ -7,17 +7,16 @@ import random
 from collections import defaultdict
 
 import dogstats_wrapper as dog_stats_api
+from course_blocks.api import get_course_in_cache, get_course_blocks
+from courseware import courses
 from django.conf import settings
 from django.core.cache import cache
 from django.test.client import RequestFactory
 from opaque_keys import InvalidKeyError
 from opaque_keys.edx.keys import CourseKey
 from opaque_keys.edx.locator import BlockUsageLocator
-
 from openedx.core.lib.cache_utils import memoized
 from openedx.core.lib.gating import api as gating_api
-from courseware import courses
-from course_blocks.api import get_course_in_cache, get_course_blocks
 # from course_blocks.transformers.grades import GradesBlockTransformer
 from courseware.model_data import FieldDataCache, ScoresClient
 from openedx.core.djangoapps.signals.signals import GRADES_UPDATED

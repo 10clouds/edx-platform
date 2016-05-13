@@ -15,7 +15,6 @@ from openedx.core.lib.graph_traversals import traverse_topologically, traverse_p
 
 from .exceptions import TransformerException
 
-
 logger = getLogger(__name__)  # pylint: disable=invalid-name
 
 
@@ -277,7 +276,7 @@ class FieldData(object):
     Data structure to encapsulate collected fields.
     """
     def __init__(self):
-        # Map of xblock field name to the field's value for this block.
+        # Map of field name to the field's value for this block.
         # dict {string: any picklable type}
         self.fields = {}
 
@@ -311,16 +310,15 @@ class TransformerData(FieldData):
     pass
 
 
-class BlockData(object):
+class BlockData(FieldData):
     """
     Data structure to encapsulate collected data for a single block.
     """
     def __init__(self, usage_key):
+        super(BlockData, self).__init__()
+
         # Location (or usage key) of the block.
         self.location = usage_key
-
-        # Map of xblock field name to the field's value for this block.
-        self.xblock_fields = FieldData()
 
         # Map of transformer name to its block-specific data.
         self.transformer_data = defaultdict(TransformerData)
@@ -379,7 +377,7 @@ class BlockStructureBlockData(BlockStructure):
                 not found.
         """
         block_data = self._block_data_map.get(usage_key)
-        return block_data.xblock_fields.get(field_name, default) if block_data else default
+        return getattr(block_data, field_name, default) if block_data else default
 
     def get_transformer_data(self, transformer, key, default=None):
         """
@@ -696,4 +694,4 @@ class BlockStructureModulestoreData(BlockStructureBlockData):
                 being collected and stored.
         """
         if hasattr(xblock, field_name):
-            setattr(block_data.xblock_fields, field_name, getattr(xblock, field_name))
+            setattr(block_data, field_name, getattr(xblock, field_name))
