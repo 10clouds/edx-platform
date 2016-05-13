@@ -340,7 +340,7 @@ class XModuleMixin(XModuleFields, XBlock):
 
     @property
     def url_name(self):
-        return block_metadata_utils.url_name_for_course_location(self)
+        return block_metadata_utils.url_name_for_block(self)
 
     @property
     def display_name_with_default(self):

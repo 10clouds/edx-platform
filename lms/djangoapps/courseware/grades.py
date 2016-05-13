@@ -234,7 +234,7 @@ def grading_context(course_structure):
     for chapter_key in course_structure.get_children(course_structure.root_block_usage_key):
         for section_key in course_structure.get_children(chapter_key):
             section = course_structure[section_key]
-            scored_descendants_of_section = [section_key]
+            scored_descendants_of_section = [section]
             if section.graded:
                 for descendant_key in course_structure.post_order_traversal(
                     filter_func=possibly_scored,
@@ -583,7 +583,7 @@ def _progress_summary(student, request, course):
     will return None.
 
     """
-    course_structure = get_course_blocks(student.id, course.location)
+    course_structure = get_course_blocks(student, course.location)
     grading_context_result = grading_context(course_structure)
     scorable_locations = [block.location for block in grading_context_result['all_scored_blocks']]
 

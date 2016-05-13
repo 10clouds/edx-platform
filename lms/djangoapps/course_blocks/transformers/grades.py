@@ -64,7 +64,7 @@ class GradesBlockTransformer(BlockStructureTransformer):
         request.session = {}
         for block_locator in block_structure.topological_traversal():
             course_id = unicode(block_locator.course_key)
-            usage_id = block_locator._to_deprecated_string()  # pylint: disable=protected-access
+            usage_id = unicode(block_locator)
             module, __ = module_render.get_module_by_usage_id(request, course_id, usage_id)
             yield module
 
@@ -73,8 +73,11 @@ class GradesBlockTransformer(BlockStructureTransformer):
         """
         Collect the `max_score` for every block in the provided `block_structure`.
         """
-        for module in cls._iter_xmodules(block_structure):
-            cls._collect_max_score(block_structure, module)
+        # for module in cls._iter_xmodules(block_structure):
+        #     cls._collect_max_score(block_structure, module)
+
+        for block_locator in block_structure.post_order_traversal():
+            block_structure.set_transformer_block_field(block_locator, cls, 'max_score', 100)
 
     @classmethod
     def _collect_max_score(cls, block_structure, module):
