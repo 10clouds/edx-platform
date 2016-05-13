@@ -15,6 +15,18 @@
                     PagingCollection.prototype.constructor.call(this, models, options);
                 },
 
+                parse: function (response, options) {
+                    if (!response) {
+                        response = {};
+                    }
+
+                    if (!response.results) {
+                        response.results = [];
+                    }
+
+                    return PagingCollection.prototype.parse.call(this, response, options);
+                },
+
                 onUpdate: function(event) {
                     // Mark the collection as stale so that it knows to refresh when needed.
                     this.isStale = true;

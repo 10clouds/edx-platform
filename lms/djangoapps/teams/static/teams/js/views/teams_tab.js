@@ -221,7 +221,7 @@
                                 title: gettext('Team Search'),
                                 description: interpolate(
                                     gettext('Showing results for "%(searchString)s"'),
-                                    { searchString: view.teamsCollection.searchString },
+                                    { searchString: view.teamsCollection.getSearchString() },
                                     true
                                 ),
                                 showSortControls: false
@@ -336,7 +336,7 @@
                                     per_page: 10
                                 });
                                 view.teamsCollection = collection;
-                                collection.setPage(1).then(function () {
+                                collection.getPage(1).then(function () {
                                     var teamsView = view.createTeamsListView({
                                         topic: topic,
                                         collection: collection,
@@ -387,7 +387,7 @@
                         // that the collection doesn't unnecessarily get refreshed again.
                         collection.isStale = false;
 
-                        if (collection.searchString) {
+                        if (collection.getSearchString()) {
                             Backbone.history.navigate(searchUrl, {trigger: true});
                         } else if (Backbone.history.getFragment() === searchUrl) {
                             Backbone.history.navigate('topics/' + topic.get('id'), {trigger: true});

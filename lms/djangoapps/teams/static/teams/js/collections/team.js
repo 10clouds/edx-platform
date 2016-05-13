@@ -19,9 +19,11 @@
                         return this.options.course_id;
                     },
                     order_by: function () {
-                        return this.options.searchString ? '' : this.state.sortKey;
+                        return this.getSearchString() ? '' : this.state.sortKey;
                     },
-                    text_search: function () { return this.options.searchString || ''; }
+                    text_search: function () {
+                        return this.getSearchString() || '';
+                    }
                 },
 
                 constructor: function(teams, options) {
