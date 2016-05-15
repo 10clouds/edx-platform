@@ -12,9 +12,7 @@
 
                 queryParams: {
                     course_id: function () { return this.course_id; },
-                    text_search: function () { return this.searchString || ''; },
-                    totalPages: null,
-                    totalRecords: null
+                    text_search: function () { return this.searchString || ''; }
                 },
 
                 constructor: function(topics, options) {

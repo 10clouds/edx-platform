@@ -29,10 +29,19 @@
                 constructor: function(teams, options) {
                     this.state = _.extend({}, TeamCollection.prototype.state, this.state);
                     this.queryParams = _.extend({}, TeamCollection.prototype.queryParams, this.queryParams);
+                    this.topic_id = options.topic_id;
                     BaseCollection.prototype.constructor.call(this, teams, options);
 
                     this.registerSortableField('last_activity_at', gettext('last activity'));
                     this.registerSortableField('open_slots', gettext('open slots'));
+                },
+
+                setFilterField: function (fieldName, value) {
+                    BaseCollection.prototype.setFilterField.call(this, fieldName, value);
+
+                    this.queryParams[fieldName] = function () {
+                        return value;
+                    };
                 }
             });
             return TeamCollection;
