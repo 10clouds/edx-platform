@@ -37,14 +37,21 @@ define([
                  AjaxHelpers.respondWithJson(requests, responseData);
             };
 
-            mockRender = function() {
-                var requests, view;
+            mockRender = function(useEcommerceOrderNumber) {
+                var requests, view, orderUrlFormat;
                 requests = AjaxHelpers.requests(this);
                 view = createReceiptView();
                 view.useEcommerceApi = true;
-                view.ecommerceOrderNumber = 'EDX-123456';
+                if (useEcommerceOrderNumber){
+                    view.ecommerceOrderNumber = 'EDX-123456';
+                    orderUrlFormat = '/api/commerce/v1/orders/EDX-123456/';
+                }
+                else {
+                    view.ecommerceBasketId = 'EDX-123456';
+                    orderUrlFormat = '/api/commerce/v0/baskets/EDX-123456/order/'
+                }
                 view.render();
-                mockRequests(requests, 'GET', '/api/commerce/v1/orders/EDX-123456/', data);
+                mockRequests(requests, 'GET', orderUrlFormat, data);
 
                 mockRequests(
                     requests, 'GET', '/api/course_structure/v0/courses/course-v1:edx+dummy+2015_T3/', courseResponseData
@@ -146,7 +153,7 @@ define([
             it('sends analytic event when verified receipt is rendered', function() {
                 loadVerifiedReceiptFixture();
                 loadReceiptFixture();
-                mockRender();
+                mockRender(true);
                 expect(window.analytics.track).toHaveBeenCalledWith(
                     'Completed Order',
                     {
@@ -161,7 +168,7 @@ define([
             it('sends analytic event when non verified receipt is rendered', function() {
                 loadNonVerifiedReceiptFixture();
                 loadReceiptFixture();
-                mockRender();
+                mockRender(true);
                 expect(window.analytics.track).toHaveBeenCalledWith(
                     'Completed Order',
                     {
@@ -173,12 +180,21 @@ define([
 
             });
 
-            it('renders a receipt correctly', function() {
+            it('renders a receipt correctly with Ecommerce Order Number', function() {
                 var view;
                 loadVerifiedReceiptFixture();
                 loadReceiptFixture();
 
-                view = mockRender();
+                view = mockRender(true);
+                expect(view.$('.course_name_placeholder').text()).toContain('receipt test');
+            });
+
+            it('renders a receipt correctly with Ecommerce Basket Id', function() {
+                var view;
+                loadVerifiedReceiptFixture();
+                loadReceiptFixture();
+
+                view = mockRender(false);
                 expect(view.$('.course_name_placeholder').text()).toContain('receipt test');
             });
 
