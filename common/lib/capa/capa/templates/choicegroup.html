@@ -1,3 +1,4 @@
+<%! from django.utils.translation import ugettext as _ %>
 <form class="choicegroup capa_inputtype" id="inputtype_${id}">
     <fieldset role="${input_type}group" aria-label="${label}">
         % for choice_id, choice_description in choices:
@@ -61,5 +62,11 @@
     %endif
     % if msg:
     <span class="message">${msg|n}</span>
+    % endif
+    % if demand_hint_possible:
+    <div class="action" >
+        <div class="problem-hint" aria-live="polite"></div>
+        <button class="hint-button" data-value="${_('Hint')}">${_('Hint')}</button>
+    </div>
     % endif
 </form>

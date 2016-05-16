@@ -1,6 +1,16 @@
 # This file tests the parsing of  extended-hints, double bracket sections {{ .. }}
 # for all sorts of markdown.
 describe 'Markdown to xml extended hint dropdown', ->
+  beforeEach ->
+      jasmine.addMatchers
+        toXMLEqual: ->
+          return {
+            compare: (actual, expected) ->
+              {
+                  pass: actual.replace(/\s+/g, '') == expected.replace(/\s+/g, '')
+              }
+          }
+
   it 'produces xml', ->
     data = MarkdownEditingDescriptor.markdownToXml("""
       Translation between Dropdown and ________ is straightforward.
@@ -11,7 +21,7 @@ describe 'Markdown to xml extended hint dropdown', ->
          Numerical Input	 {{ No, numerical input problems don't present options. }}
       ]]
 
-
+      ---
 
       Clowns have funny _________ to make people laugh.
       
@@ -25,8 +35,9 @@ describe 'Markdown to xml extended hint dropdown', ->
       ]]
 
     """)
-    expect(data).toEqual("""
+    expect(data).toXMLEqual("""
     <problem>
+    <question>
     <p>Translation between Dropdown and ________ is straightforward.</p>
     <optionresponse>
       <optioninput>
@@ -35,7 +46,8 @@ describe 'Markdown to xml extended hint dropdown', ->
         <option correct="False">Numerical Input <optionhint>No, numerical input problems don't present options.</optionhint></option>
       </optioninput>
     </optionresponse>
-
+    </question>
+    <question>
     <p>Clowns have funny _________ to make people laugh.</p>
     <optionresponse>
       <optioninput>
@@ -46,7 +58,7 @@ describe 'Markdown to xml extended hint dropdown', ->
         <option correct="False">-no hint-</option>
       </optioninput>
     </optionresponse>
-    
+    </question>
     </problem>
     """)
 
@@ -64,8 +76,9 @@ describe 'Markdown to xml extended hint dropdown', ->
       || 1) one ||
       || 2) two ||
     """)
-    expect(data).toEqual("""
+    expect(data).toXMLEqual("""
     <problem>
+    <question>
     <p>Translation between Dropdown and ________ is straightforward.</p>
     <optionresponse>
       <optioninput>
@@ -80,6 +93,7 @@ describe 'Markdown to xml extended hint dropdown', ->
       <hint>1) one</hint>
       <hint>2) two</hint>
     </demandhint>
+    </question>
     </problem>
     """)
 
@@ -91,8 +105,9 @@ describe 'Markdown to xml extended hint dropdown', ->
       || 0) zero ||
       || 1) one ||
     """)
-    expect(data).toEqual("""
+    expect(data).toXMLEqual("""
     <problem>
+    <question>
     <p>A Question ________ is answered.</p>
     <optionresponse>
       <optioninput options="('Right','Wrong 1','Wrong 2')" correct="Right"></optioninput>
@@ -102,6 +117,7 @@ describe 'Markdown to xml extended hint dropdown', ->
       <hint>0) zero</hint>
       <hint>1) one</hint>
     </demandhint>
+    </question>
     </problem>
     """)
 
@@ -112,8 +128,9 @@ describe 'Markdown to xml extended hint dropdown', ->
          bb
          cc	 {{ hint2 }} ]]
     """)
-    expect(data).toEqual("""
+    expect(data).toXMLEqual("""
     <problem>
+    <question>
     <p>q1</p>
     
     <optionresponse>
@@ -124,7 +141,7 @@ describe 'Markdown to xml extended hint dropdown', ->
       </optioninput>
     </optionresponse>
     
-    
+    </question>
     </problem>
     """)
 
@@ -143,6 +160,7 @@ describe 'Markdown to xml extended hint dropdown', ->
     """)
     expect(data).toEqual("""
     <problem>
+    <question>
     <p>q1</p>
     
     <optionresponse>
@@ -153,7 +171,7 @@ describe 'Markdown to xml extended hint dropdown', ->
       </optioninput>
     </optionresponse>
     
-    
+    </question>
     </problem>
     """)
 
@@ -172,6 +190,7 @@ describe 'Markdown to xml extended hint checkbox', ->
       {{ ((A*B)) You're right that apple is a fruit, but there's one you're missing. Also, mushroom is not a fruit.}}
       {{ ((B*C)) You're right that grape is a fruit, but there's one you're missing. Also, mushroom is not a fruit.    }}
 
+      ---
 
       >>Select all the vegetables from the list<<
              
@@ -184,8 +203,9 @@ describe 'Markdown to xml extended hint checkbox', ->
       {{ ((A*B)) Making a banana split? }}
       {{ ((B*D)) That will make a horrible dessert: a brussel sprout split? }}
     """)
-    expect(data).toEqual("""
+    expect(data).toXMLEqual("""
     <problem>
+    <question>
     <p>Select all the fruits from the list</p>
     <choiceresponse>
       <checkboxgroup label="Select all the fruits from the list">
@@ -206,7 +226,9 @@ describe 'Markdown to xml extended hint checkbox', ->
         <compoundhint value="B*C">You're right that grape is a fruit, but there's one you're missing. Also, mushroom is not a fruit.</compoundhint>
       </checkboxgroup>
     </choiceresponse>
+    </question>
 
+    <question>
     <p>Select all the vegetables from the list</p>
     <choiceresponse>
       <checkboxgroup label="Select all the vegetables from the list">
@@ -225,7 +247,7 @@ describe 'Markdown to xml extended hint checkbox', ->
       </checkboxgroup>
     </choiceresponse>
 
-
+    </question>
     </problem>
     """)
 
@@ -244,7 +266,7 @@ describe 'Markdown to xml extended hint checkbox', ->
               {{ ((A*B)) You're right that apple is a fruit, but there's one you're missing. Also, mushroom is not a fruit.}}
               {{ ((B*C)) You're right that grape is a fruit, but there's one you're missing. Also, mushroom is not a fruit.}}
 
-
+      ---
 
       >>Select all the vegetables from the list<<
 

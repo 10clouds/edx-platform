@@ -60,6 +60,7 @@ class CapaModule(CapaMixin, XModule):
           'progress' : 'none'/'in_progress'/'done',
           <other request-specific values here > }
         """
+        from nose.tools import  set_trace; set_trace()
         handlers = {
             'hint_button': self.hint_button,
             'problem_get': self.get_problem,

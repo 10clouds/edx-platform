@@ -25,6 +25,8 @@ class @Problem
 
     window.update_schematics()
 
+    debugger
+
     problem_prefix = @element_id.replace(/problem_/,'')
     @inputs = @$("[id^='input_#{problem_prefix}_']")
     @$('div.action button').click @refreshAnswers
@@ -803,9 +805,10 @@ class @Problem
         @enableCheckButton true
     window.setTimeout(enableCheckButton, 750)
 
-  hint_button: =>
+  hint_button: (event)=>
     # Store the index of the currently shown hint as an attribute.
     # Use that to compute the next hint number when the button is clicked.
+    debugger
     hint_index = @$('.problem-hint').attr('hint_index')
     if hint_index == undefined
       next_index = 0

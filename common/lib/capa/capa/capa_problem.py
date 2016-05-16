@@ -27,7 +27,7 @@ from capa.correctmap import CorrectMap
 import capa.inputtypes as inputtypes
 import capa.customrender as customrender
 import capa.responsetypes as responsetypes
-from capa.util import contextualize_text, convert_files_to_filenames
+from capa.util import contextualize_text, convert_files_to_filenames, get_inner_html_from_xpath
 import capa.xqueue_interface as xqueue_interface
 from capa.safe_exec import safe_exec
 
@@ -41,6 +41,7 @@ response_properties = ["codeparam", "responseparam", "answer", "openendedparam"]
 # special problem tags which should be turned into innocuous HTML
 html_transforms = {
     'problem': {'tag': 'div'},
+    'question': {'tag': 'div'},
     'text': {'tag': 'span'},
     'math': {'tag': 'span'},
 }
@@ -577,6 +578,52 @@ class LoncapaProblem(object):
             log.warning("Could not find matching input for id: %s", input_id)
             return {}
 
+    def handle_demandhint(self, data):
+        """
+        Return html for the problem.
+
+        Adds check, reset, save, and hint buttons as necessary based on the problem config
+        and state.
+        encapsulate: if True (the default) embed the html in a problem <div>
+        hint_index: (None is the default) if not None, this is the index of the next demand
+        hint to show.
+        """
+        hint_index = int(data['hint_index'])
+        input_id = data['input_id']
+        inputtype = self.inputs.get(input_id)
+
+        if inputtype:
+            demand_hints = inputtype.xpath("demandhint/hint")
+            hint_index = hint_index % len(demand_hints)
+
+            _ = self.runtime.service(self, "i18n").ugettext
+            hint_element = demand_hints[hint_index]
+            hint_text = get_inner_html_from_xpath(hint_element)
+            if len(demand_hints) == 1:
+                prefix = _('Hint: ')
+            else:
+                # Translators: e.g. "Hint 1 of 3" meaning we are showing the first of three hints.
+                prefix = _('Hint ({hint_num} of {hints_count}): ').format(hint_num=hint_index + 1,
+                                                                          hints_count=len(demand_hints))
+
+            # Log this demand-hint request
+            event_info = dict()
+            event_info['module_id'] = self.location.to_deprecated_string()
+            event_info['hint_index'] = hint_index
+            event_info['hint_len'] = len(demand_hints)
+            event_info['hint_text'] = hint_text
+            self.runtime.track_function('edx.problem.hint.demandhint_displayed', event_info)
+
+            # We report the index of this hint, the client works out what index to use to get the next hint
+            return {
+                'success': True,
+                'contents': prefix + hint_text,
+                'hint_index': hint_index
+            }
+        else:
+            log.warning("Could not find matching input for id: %s", input_id)
+            return {}
+
     # ======= Private Methods Below ========
 
     def _process_includes(self):
@@ -736,6 +783,7 @@ class LoncapaProblem(object):
 
         Used by get_html.
         """
+        # from nose.tools import  set_trace; set_trace()
         if not isinstance(problemtree.tag, basestring):
             # Comment and ProcessingInstruction nodes are not Elements,
             # and we're ok leaving those behind.
@@ -790,6 +838,7 @@ class LoncapaProblem(object):
                 }
             }
 
+            # from nose.tools import set_trace; set_trace()
             input_type_cls = inputtypes.registry.get_class_for_tag(problemtree.tag)
             # save the input type so that we can make ajax calls on it if we need to
             self.inputs[input_id] = input_type_cls(self.capa_system, problemtree, state)
@@ -810,8 +859,13 @@ class LoncapaProblem(object):
 
         # otherwise, render children recursively, and copy over attributes
         tree = etree.Element(problemtree.tag)
+
         for item in problemtree:
             item_xhtml = self._extract_html(item)
+
+            if item.tag == 'question':
+                item_xhtml.set('class', 'question')
+
             if item_xhtml is not None:
                 tree.append(item_xhtml)
 

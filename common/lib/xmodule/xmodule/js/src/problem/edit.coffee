@@ -205,18 +205,18 @@ class @MarkdownEditingDescriptor extends XModule.Descriptor
       xml = xml.replace(/(^.*?$)(?=\n\=\=+$)/gm, '<h3 class="hd hd-2 problem-header">$1</h3>');
       xml = xml.replace(/\n^\=\=+$/gm, '');
 
-      // Pull out demand hints,  || a hint ||
-      var demandhints = '';
-      xml = xml.replace(/(^\s*\|\|.*?\|\|\s*$\n?)+/gm, function(match) {  // $\n
-          var options = match.split('\n');
-          for (i = 0; i < options.length; i += 1) {
-              var inner = /\s*\|\|(.*?)\|\|/.exec(options[i]);
-              if (inner) {
-                  demandhints += '  <hint>' + inner[1].trim() + '</hint>\n';
-              }
-           }
-           return '';
-      });
+      //// Pull out demand hints,  || a hint ||
+      //var demandhints = '';
+      //xml = xml.replace(/(^\s*\|\|.*?\|\|\s*$\n?)+/gm, function(match) {  // $\n
+      //    var options = match.split('\n');
+      //    for (i = 0; i < options.length; i += 1) {
+      //        var inner = /\s*\|\|(.*?)\|\|/.exec(options[i]);
+      //        if (inner) {
+      //            demandhints += '  <hint>' + inner[1].trim() + '</hint>\n';
+      //        }
+      //     }
+      //     return '';
+      //});
 
       // replace \n+whitespace within extended hint {{ .. }}, by a space, so the whole
       // hint sits on one line.
@@ -349,7 +349,7 @@ class @MarkdownEditingDescriptor extends XModule.Descriptor
 
       // group check answers
       // [.] with {{...}} lines mixed in
-      xml = xml.replace(/(^\s*((\[.?\])|({{.*?}})).*?$\n*)+/gm, function(match) {
+      xml = xml.replace(/(^\s*((\[.?\])|({{.*?}})|(\|\|.*?\|\|)).*?$\n*)+/gm, function(match) {
           var groupString = '<choiceresponse>\n',
               options, value, correct;
 
@@ -357,11 +357,18 @@ class @MarkdownEditingDescriptor extends XModule.Descriptor
           options = match.split('\n');
 
           endHints = '';  // save these up to emit at the end
+          var demandhints = '<demandhint>\n';
 
           for (i = 0; i < options.length; i += 1) {
               if(options[i].trim().length > 0) {
                   // detect the {{ ((A*B)) ...}} case first
                   // emits: <compoundhint value="A*B">AB hint</compoundhint>
+
+                  var dh = /\s*\|\|(.*?)\|\|/.exec(options[i]);
+                  if (dh) {
+                      demandhints += '  <hint>' + dh[1].trim() + '</hint>\n';
+                      continue;
+                  }
 
                   var abhint = /^\s*{{\s*\(\((.*?)\)\)(.*?)}}/.exec(options[i]);
                   if (abhint) {
@@ -400,7 +407,10 @@ class @MarkdownEditingDescriptor extends XModule.Descriptor
               }
           }
 
+          demandhints += '</demandhint>\n'
+
           groupString += endHints;
+          groupString += demandhints;
           groupString += '  </checkboxgroup>\n';
           groupString += '</choiceresponse>\n\n';
 
@@ -569,12 +579,12 @@ class @MarkdownEditingDescriptor extends XModule.Descriptor
       xml = xml.replace(/\n\n\n/g, '\n');
 
       // if we've come across demand hints, wrap in <demandhint> at the end
-      if (demandhints) {
-          demandhints = '\n<demandhint>\n' + demandhints + '</demandhint>';
-      }
+      //if (demandhints) {
+      //    demandhints = '\n<demandhint>\n' + demandhints + '</demandhint>';
+      //}
 
       // treat this as a single question
-      xml = '<question>\n' + xml + demandhints + '\n</question>';
+      xml = '<question>\n' + xml + '\n</question>';
 
       return xml;
     }`

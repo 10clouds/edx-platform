@@ -200,7 +200,7 @@ class InputTypeBase(object):
                          feedback from previous attempt.  Specifically 'message', 'hint',
                          'hintmode'.  If 'hintmode' is 'always', the hint is always displayed.)
         """
-
+        # from nose.tools import  set_trace; set_trace()
         self.xml = xml
         self.tag = xml.tag
         self.capa_system = system
@@ -225,6 +225,7 @@ class InputTypeBase(object):
         self.hintmode = feedback.get('hintmode', None)
         self.input_state = state.get('input_state', {})
         self.answervariable = state.get("answervariable", None)
+        self.demand_hint_possible = bool(self.xml.xpath('demandhint'))
 
         # put hint above msg if it should be displayed
         if self.hintmode == 'always':
@@ -317,6 +318,7 @@ class InputTypeBase(object):
             'status': Status(self.status, self.capa_system.i18n.ugettext),
             'msg': self.msg,
             'STATIC_URL': self.capa_system.STATIC_URL,
+            'demand_hint_possible': self.demand_hint_possible,
         }
         context.update(
             (a, v) for (a, v) in self.loaded_attributes.iteritems() if a in self.to_render
@@ -448,6 +450,7 @@ class ChoiceGroup(InputTypeBase):
     tags = ['choicegroup', 'radiogroup', 'checkboxgroup']
 
     def setup(self):
+        # from nose.tools import  set_trace; set_trace()
         i18n = self.capa_system.i18n
         # suffix is '' or [] to change the way the input is handled in --as a scalar or vector
         # value.  (VS: would be nice to make this less hackish).
@@ -471,6 +474,7 @@ class ChoiceGroup(InputTypeBase):
 
     @classmethod
     def get_attributes(cls):
+        # from nose.tools import  set_trace; set_trace()
         # Make '_' a no-op so we can scrape strings. Using lambda instead of
         #  `django.utils.translation.ugettext_noop` because Django cannot be imported in this file
         _ = lambda text: text
@@ -479,6 +483,7 @@ class ChoiceGroup(InputTypeBase):
                 Attribute("submitted_message", _("Answer received."))]
 
     def _extra_context(self):
+        # from nose.tools import  set_trace; set_trace()
         return {'input_type': self.html_input_type,
                 'choices': self.choices,
                 'name_array_suffix': self.suffix}
@@ -494,7 +499,7 @@ class ChoiceGroup(InputTypeBase):
         TODO: allow order of choices to be randomized, following lon-capa spec.  Use
         "location" attribute, ie random, top, bottom.
         """
-
+        # from nose.tools import  set_trace; set_trace()
         choices = []
         _ = i18n.ugettext
 
@@ -502,7 +507,7 @@ class ChoiceGroup(InputTypeBase):
             if choice.tag == 'choice':
                 choices.append((choice.get("name"), stringify_children(choice)))
             else:
-                if choice.tag != 'compoundhint':
+                if choice.tag not in ('compoundhint', 'demandhint'):
                     msg = u'[capa.inputtypes.extract_choices] {error_message}'.format(
                         # Translators: '<choice>' and '<compoundhint>' are tag names and should not be translated.
                         error_message=_('Expected a <choice> or <compoundhint> tag; got {given_tag} instead').format(

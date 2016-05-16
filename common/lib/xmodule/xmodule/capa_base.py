@@ -601,7 +601,7 @@ class CapaMixin(CapaFields):
         hint_index: (None is the default) if not None, this is the index of the next demand
         hint to show.
         """
-        demand_hints = self.lcp.tree.xpath("//problem/demandhint/hint")
+        demand_hints = self.lcp.tree.xpath("//problem/question/demandhint/hint")
         hint_index = hint_index % len(demand_hints)
 
         _ = self.runtime.service(self, "i18n").ugettext
@@ -665,7 +665,7 @@ class CapaMixin(CapaFields):
         }
 
         # If demand hints are available, emit hint button and div.
-        demand_hints = self.lcp.tree.xpath("//problem/demandhint/hint")
+        demand_hints = self.lcp.tree.xpath("//problem/question/demandhint/hint")
         demand_hint_possible = len(demand_hints) > 0
 
         context = {
@@ -718,8 +718,11 @@ class CapaMixin(CapaFields):
         """
         Hint button handler, returns new html using hint_index from the client.
         """
-        hint_index = int(data['hint_index'])
-        return self.get_demand_hint(hint_index)
+        from nose.tools import set_trace; set_trace()
+        response = self.lcp.handle_demandhint(data)
+        return response
+        # hint_index = int(data['hint_index'])
+        # return self.get_demand_hint(hint_index)
 
     def is_past_due(self):
         """
