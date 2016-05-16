@@ -129,7 +129,12 @@
                 })
             ];
 
-            var badgeCollection = new PagingCollection();
+            var BadgeCollection = PagingCollection.extend({
+                queryParams: {
+                    currentPage: 'current_page'
+                }
+            });
+            var badgeCollection = new BadgeCollection();
             badgeCollection.url = options.badges_api_url;
 
             var badgeListContainer = new BadgeListContainer({

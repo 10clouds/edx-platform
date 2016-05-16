@@ -15,7 +15,12 @@ define([
             var view, requests;
 
             var createView = function (requests, badge_list_object) {
-                var badgeCollection = new PagingCollection();
+                var BadgeCollection = PagingCollection.extend({
+                    queryParams: {
+                        currentPage: 'current_page'
+                    }
+                });
+                var badgeCollection = new BadgeCollection();
                 badgeCollection.url = '/api/badges/v1/assertions/user/staff/';
                 var models = [];
                 _.each(_.range(badge_list_object.count), function (idx) {
