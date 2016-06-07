@@ -56,7 +56,7 @@ class EdevateDbConnector:
 
     def create_verification_course(self, openedx_course_id, published_by_id):
         self.cursor.execute("""INSERT INTO openedx_edxcourseverification
-                               (edx_course_id, state, published_by_id)
+                               (openedx_course_id, status, published_by_id)
                                VALUES ('{}', 'reviewable', '{}');
                             """.format(openedx_course_id, published_by_id)
                             )
