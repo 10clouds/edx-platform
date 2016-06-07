@@ -134,3 +134,10 @@ MODULESTORE = convert_module_store_setting_if_needed(MODULESTORE)
 
 # Dummy secret key for dev
 SECRET_KEY = '85920908f28904ed733fe576320db18cabd7b6cd'
+
+# Edevate db settings
+EDEVATE_MYSQL_HOST = 'edevate-devel.c60tpezs6h1t.us-east-1.rds.amazonaws.com'
+EDEVATE_MYSQL_PORT = 3306
+EDEVATE_MYSQL_USER = 'edevate_devel'
+EDEVATE_MYSQL_PASSWD = 'edevate12'
+EDEVATE_MYSQL_DB_NAME = 'edevate_devel'
