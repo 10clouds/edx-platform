@@ -1,9 +1,11 @@
 """
 Signal handler for invalidating cached course overviews
 """
+from django.contrib.auth.models import User
 from django.dispatch.dispatcher import receiver
 
 from .models import CourseOverview
+from .connector import EdevateDbConnector
 from xmodule.modulestore.django import SignalHandler
 
 
@@ -28,3 +30,20 @@ def _listen_for_course_delete(sender, course_key, **kwargs):  # pylint: disable=
     from cms.djangoapps.contentstore.courseware_index import CourseAboutSearchIndexer
     # Delete course entry from Course About Search_index
     CourseAboutSearchIndexer.remove_deleted_items(course_key)
+
+
+@receiver(SignalHandler.course_published)
+def _create_edevate_course_for_verification(sender, course_key, **kwargs):  # pylint: disable=unused-argument
+    """
+    Catches the signal that a course has been published in Studio and
+    create course on the edevate for verification.
+    """
+    try:
+        course = modulestore().get_course(course_key)
+        course_author = User.objects.get(pk=course.published_by)
+        edevate_db = EdevateDbConnector()
+        edevate_db.update_or_create_verification_course(course_key,
+                                                        course_author.email)
+        edevate_db.close()
+    except User.DoseNotExist:
+        pass
