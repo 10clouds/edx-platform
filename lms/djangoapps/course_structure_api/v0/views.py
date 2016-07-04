@@ -133,6 +133,8 @@ class CourseList(CourseViewMixin, ListAPIView):
 
             * name: The name of the course.
 
+            * subject: The subject of the course.
+
             * category: The type of content. In this case, the value is always
               "course".
 
@@ -191,6 +193,8 @@ class CourseDetail(CourseViewMixin, RetrieveAPIView):
         * id: The unique identifier for the course.
 
         * name: The name of the course.
+
+        * subject: The subject of the course.
 
         * category: The type of content.
 

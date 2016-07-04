@@ -1,5 +1,6 @@
 """ Django REST Framework Serializers """
 
+from django.conf import settings
 from django.core.urlresolvers import reverse
 from rest_framework import serializers
 
@@ -10,6 +11,7 @@ class CourseSerializer(serializers.Serializer):
     """ Serializer for Courses """
     id = serializers.CharField()  # pylint: disable=invalid-name
     name = serializers.CharField(source='display_name')
+    subject = serializers.SerializerMethodField()
     category = serializers.CharField()
     org = serializers.SerializerMethodField()
     run = serializers.SerializerMethodField()
@@ -18,6 +20,13 @@ class CourseSerializer(serializers.Serializer):
     image_url = serializers.SerializerMethodField()
     start = serializers.DateTimeField()
     end = serializers.DateTimeField()
+
+    def get_subject(self, course):
+        if course.subject:
+            for subject_tuple in settings.ALL_SUBJECTS:
+                if subject_tuple[0] == course.subject:
+                    return subject_tuple[1]
+        return None
 
     def get_org(self, course):
         """ Gets the course org """

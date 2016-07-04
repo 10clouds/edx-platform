@@ -43,6 +43,7 @@ class CourseMetadata(object):
         'is_entrance_exam',
         'in_entrance_exam',
         'language',
+        'subject',
         'certificates',
         'minimum_grade_credit',
         'default_time_limit_minutes',

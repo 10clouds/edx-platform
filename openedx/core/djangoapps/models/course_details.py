@@ -42,6 +42,7 @@ class CourseDetails(object):
         self.course_id = course_id
         self.run = run
         self.language = None
+        self.subject = None
         self.start_date = None  # 'start'
         self.end_date = None  # 'end'
         self.enrollment_start = None
@@ -115,6 +116,7 @@ class CourseDetails(object):
         course_details.video_thumbnail_image_name = course_descriptor.video_thumbnail_image
         course_details.video_thumbnail_image_asset_path = course_image_url(course_descriptor, 'video_thumbnail_image')
         course_details.language = course_descriptor.language
+        course_details.subject = course_descriptor.subject
         course_details.self_paced = course_descriptor.self_paced
         course_details.learning_info = course_descriptor.learning_info
         course_details.instructor_info = course_descriptor.instructor_info
@@ -263,6 +265,10 @@ class CourseDetails(object):
 
         if 'language' in jsondict and jsondict['language'] != descriptor.language:
             descriptor.language = jsondict['language']
+            dirty = True
+
+        if 'subject' in jsondict and jsondict['subject'] != descriptor.subject:
+            descriptor.subject = jsondict['subject']
             dirty = True
 
         if (SelfPacedConfiguration.current().enabled
