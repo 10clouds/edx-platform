@@ -4,6 +4,7 @@ Course API Serializers.  Representing course catalog data
 
 import urllib
 
+from django.conf import settings
 from django.core.urlresolvers import reverse
 from rest_framework import serializers
 
@@ -58,6 +59,7 @@ class CourseSerializer(serializers.Serializer):  # pylint: disable=abstract-meth
 
     blocks_url = serializers.SerializerMethodField()
     effort = serializers.CharField()
+    subject = serializers.SerializerMethodField()
     end = serializers.DateTimeField()
     enrollment_start = serializers.DateTimeField()
     enrollment_end = serializers.DateTimeField()
@@ -74,6 +76,13 @@ class CourseSerializer(serializers.Serializer):  # pylint: disable=abstract-meth
 
     # 'course_id' is a deprecated field, please use 'id' instead.
     course_id = serializers.CharField(source='id', read_only=True)
+
+    def get_subject(self, course_overview):
+        if course_overview.subject:
+            for subject_tuple in settings.ALL_SUBJECTS:
+                if subject_tuple[0] == course_overview.subject:
+                    return subject_tuple[1]
+        return None
 
     def get_blocks_url(self, course_overview):
         """

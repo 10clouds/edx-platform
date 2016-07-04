@@ -934,6 +934,18 @@ LANGUAGE_DICT = dict(LANGUAGES)
 USE_I18N = True
 USE_L10N = True
 
+ALL_SUBJECTS = (
+    ('architecture', u'Architecture'),
+    ('art_culture', u'Art & Culture'),
+    ('biology_life_sciences', u'Biology & Life Sciences'),
+    ('business_management', u'Business & Management'),
+    ('chemistry', u'Chemistry'),
+    ('common', u'Common'),
+    ('communication', u'Communication'),
+    ('computer_science', u'Computer Science'),
+    ('data_analysis_statistics', u'Data Analysis & Statistics'),
+)
+
 STATICI18N_ROOT = PROJECT_ROOT / "static"
 STATICI18N_OUTPUT_DIR = "js/i18n"
 
