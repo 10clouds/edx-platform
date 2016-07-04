@@ -41,6 +41,7 @@ from contentstore.push_notification import push_notification_enabled
 from contentstore.tasks import rerun_course
 from contentstore.utils import (
     add_instructor,
+    add_sales_finance_admin,
     initialize_permissions,
     get_lms_link_for_item,
     remove_all_instructors,
@@ -820,7 +821,7 @@ def create_new_course_in_store(store, user, org, number, run, fields):
 
     # Make sure user has instructor and staff access to the new course
     add_instructor(new_course.id, user, user)
-
+    add_sales_finance_admin(new_course.id, user, user)
     # Initialize permissions for user in the new course
     initialize_permissions(new_course.id, user)
     return new_course
@@ -849,7 +850,7 @@ def _rerun_course(request, org, number, run, fields):
     # Make sure user has instructor and staff access to the destination course
     # so the user can see the updated status for that course
     add_instructor(destination_course_key, request.user, request.user)
-
+    add_sales_finance_admin(destination_course_key, request.user, request.user)
     # Mark the action as initiated
     CourseRerunState.objects.initiated(source_course_key, destination_course_key, request.user, fields['display_name'])
 

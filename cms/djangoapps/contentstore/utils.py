@@ -19,7 +19,8 @@ from xmodule.modulestore import ModuleStoreEnum
 from xmodule.modulestore.django import modulestore
 from xmodule.modulestore.exceptions import ItemNotFoundError
 from opaque_keys.edx.keys import UsageKey, CourseKey
-from student.roles import CourseInstructorRole, CourseStaffRole
+from student.roles import CourseInstructorRole, CourseStaffRole, \
+    CourseFinanceAdminRole, CourseSalesAdminRole
 from student.models import CourseEnrollment
 from student import auth
 
@@ -35,6 +36,16 @@ def add_instructor(course_key, requesting_user, new_instructor):
     # can't use auth.add_users here b/c it requires user to already have Instructor perms in this course
     CourseInstructorRole(course_key).add_users(new_instructor)
     auth.add_users(requesting_user, CourseStaffRole(course_key), new_instructor)
+
+
+def add_sales_finance_admin(course_key, requesting_user, new_instructor):
+    """
+    Adds given user as sales/finance admin to the given course,
+    after verifying that the requesting_user has permission to do so.
+    """
+    # can't use auth.add_users here b/c it requires user to already have Instructor perms in this course
+    CourseFinanceAdminRole(course_key).add_users(new_instructor)
+    CourseSalesAdminRole(course_key).add_users(new_instructor)
 
 
 def initialize_permissions(course_key, user_who_created_course):
