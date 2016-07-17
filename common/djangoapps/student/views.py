@@ -285,6 +285,10 @@ def get_course_enrollments(user, org_to_include, orgs_to_exclude):
             )
             continue
 
+        # Skip subscription course
+        if unicode(course_overview.id) == unicode(settings.SUBSCRIPTION_COURSE_KEY):
+            continue
+
         # If we are in a Microsite, then filter out anything that is not
         # attributed (by ORG) to that Microsite.
         if org_to_include and course_overview.location.org != org_to_include:
@@ -708,7 +712,7 @@ def dashboard(request):
         )
     else:
         redirect_message = ''
-
+    subscription_course_key = CourseKey.from_string(unicode(settings.SUBSCRIPTION_COURSE_KEY))
     context = {
         'enrollment_message': enrollment_message,
         'redirect_message': redirect_message,
@@ -742,6 +746,9 @@ def dashboard(request):
         'disable_courseware_js': True,
         'xseries_credentials': xseries_credentials,
         'show_program_listing': ProgramsApiConfig.current().show_program_listing,
+        'is_active_subscription': user.subscriber.is_active_subscription,
+        'subscription_course_key': settings.SUBSCRIPTION_COURSE_KEY,
+        'is_subscription_course_enrolled': CourseEnrollment.is_enrolled(user, subscription_course_key)
     }
 
     ecommerce_service = EcommerceService()
@@ -1050,6 +1057,10 @@ def change_enrollment(request, check_access=True):
         )
         if redirect_url:
             return HttpResponse(redirect_url)
+
+        if user.subscriber.is_active_subscription:
+            CourseEnrollment.enroll(user, course_id, check_access=False, mode='honor')
+            return HttpResponse()
 
         # Check that auto enrollment is allowed for this course
         # (= the course is NOT behind a paywall)
