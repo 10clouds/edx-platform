@@ -76,6 +76,7 @@ def checkout_receipt(request):
         'payment_support_email': payment_support_email,
         'username': request.user.username,
         'nav_hidden': True,
-        'is_request_in_themed_site': is_request_in_themed_site()
+        'is_request_in_themed_site': is_request_in_themed_site(),
+        'subscription_course_key': settings.SUBSCRIPTION_COURSE_KEY
     }
     return render_to_response('commerce/checkout_receipt.html', context)

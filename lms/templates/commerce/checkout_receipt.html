@@ -48,12 +48,29 @@ from django.utils.translation import ugettext as _
         </div>
     </div>
 </div>
+<div id="subscription-container" class="hidden">
+    <div id="1error" class="wrapper-msg">
+        <div class=" msg msg-activate">
+            <i class="msg-icon icon fa fa-exclamation-triangle" aria-hidden="true"></i>
 
+            <div class="msg-content">
+                <h3 class="title">
+                    <span class="sr">${_("Your subscription has been updated.")}</span>
+                    ${_("Your subscription has been updated.")}
+                </h3>
+
+                <div class="msg">
+                    <p></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <div class="container">
     <section class="wrapper carousel">
         <div id="receipt-container" class="pay-and-verify hidden" data-is-payment-complete='${is_payment_complete}'
              data-platform-name='${platform_name}' data-verified='${verified}' data-username='${username}'
-                data-is-request-in-themed-site='${is_request_in_themed_site}'>
+                data-is-request-in-themed-site='${is_request_in_themed_site}' data-subscription-course-key='${subscription_course_key}'>
             <h1>${_("Loading Order Data...")}</h1>
             <span>${ _("Please wait while we retrieve your order details.") }</span>
         </div>

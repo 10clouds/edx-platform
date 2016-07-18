@@ -1104,6 +1104,42 @@ def change_enrollment(request, check_access=True):
         return HttpResponseBadRequest(_("Enrollment action is invalid"))
 
 
+@transaction.non_atomic_requests
+@require_POST
+@outer_atomic(read_committed=True)
+def update_subscription(request):
+    """
+    Modify the subscription_until date.
+
+    Args:
+        request (`Request`): The Django request object
+
+    Returns:
+        Response
+
+    """
+    # Get the user
+    user = request.user
+
+    # Ensure the user is authenticated
+    if not user.is_authenticated():
+        return HttpResponseForbidden()
+
+    order_date = request.POST.get("order_date")
+    order_status = request.POST.get("order_status")
+    if order_status == 'Complete':
+        order_datetime = datetime.datetime.strptime(order_date, "%Y-%m-%dT%H:%M:%SZ")
+        subscription_until = order_datetime.replace(tzinfo=UTC) + datetime.timedelta(days=settings.SUBSCRIPTOIN_DAYS)
+        try:
+            user.subscriber.subscription_until = subscription_until
+            user.subscriber.save()
+        except Exception as e:
+            log.error(u"{!r}".format(e))
+            return HttpResponseBadRequest(_("Could not update subscription data"))
+
+    return HttpResponse()
+
+
 # Need different levels of logging
 @ensure_csrf_cookie
 def login_user(request, error=""):  # pylint: disable=too-many-statements,unused-argument

@@ -14,6 +14,7 @@ var edx = edx || {};
         ecommerceOrderNumber: null,
 
         initialize: function () {
+            this.subscriptionCourseKey = this.$el.data('subscription-course-key');
             this.ecommerceBasketId = $.url('?basket_id');
             this.ecommerceOrderNumber = $.url('?orderNum');
             this.useEcommerceApi = this.ecommerceBasketId || this.ecommerceOrderNumber;
@@ -32,6 +33,7 @@ var edx = edx || {};
                 context = {
                     platformName: this.$el.data('platform-name'),
                     verified: this.$el.data('verified').toLowerCase() === 'true',
+                    subscription_course_key: this.subscriptionCourseKey,
                     is_request_in_themed_site: this.$el.data('is-request-in-themed-site').toLowerCase() === 'true'
                 },
                 providerId;
@@ -51,6 +53,10 @@ var edx = edx || {};
             this.trackPurchase(data);
 
             this.renderCourseNamePlaceholder(this.courseKey);
+
+            if (this.courseKey == this.subscriptionCourseKey){
+                this.updateSubscription(data);
+            }
 
             providerId = this.getCreditProviderId(data);
             if (providerId) {
@@ -120,6 +126,44 @@ var edx = edx || {};
         },
 
         /**
+         * Update user subscription data data.
+         * @param  {object} data. Data of the order that was purchased.
+         */
+        updateSubscription: function (data) {
+            var postData = {
+                'order_date': data.date_placed,
+                'order_status': data.status,
+                'order_number': data.number
+                };
+            $.ajax({
+                url: '/update_subscription',
+                type: 'POST',
+                headers: {
+                    'X-CSRFToken': $.cookie('csrftoken')
+                },
+                data: postData,
+                context: this,
+                success: this.handleUpdateSubscriptionResponse,
+                error: this.handleUpdateSubscriptionError
+            });
+        },
+
+        handleUpdateSubscriptionResponse: function( resp ) {
+            $('#subscription-container').removeClass('hidden');
+        },
+
+        handleUpdateSubscriptionError: function( xhr ) {
+            var errorMsg = gettext( 'An error has occurred. Please try again.' );
+
+            if ( xhr.status === 400 ) {
+                errorMsg = xhr.responseText;
+            }
+
+            $('#error-container h3').html(errorMsg);
+            $('#error-container').removeClass('hidden');
+        },
+
+        /**
          * Retrieve receipt data from Oscar (via LMS).
          * @param  {string} orderId Identifier of the order that was purchased.
          * @return {object} JQuery Promise.
@@ -132,7 +176,6 @@ var edx = edx || {};
             } else if (this.ecommerceBasketId){
                 urlFormat = '/api/commerce/v0/baskets/%s/order/';
             }
-
 
             return $.ajax({
                 url: _.sprintf(urlFormat, orderId),
