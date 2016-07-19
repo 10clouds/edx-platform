@@ -55,6 +55,7 @@ from student.models import (
     DashboardConfiguration, LinkedInAddToProfileConfiguration, ManualEnrollmentAudit, ALLOWEDTOENROLL_TO_ENROLLED)
 from student.forms import AccountCreationForm, PasswordResetFormNoActive, get_registration_extension_form
 from lms.djangoapps.commerce.utils import EcommerceService  # pylint: disable=import-error
+from lms.djangoapps.commerce.constants import OrderStatus  # pylint: disable=import-error
 from lms.djangoapps.verify_student.models import SoftwareSecurePhotoVerification  # pylint: disable=import-error
 from certificates.models import CertificateStatuses, certificate_status_for_student
 from certificates.api import (  # pylint: disable=import-error
@@ -1127,7 +1128,7 @@ def update_subscription(request):
 
     order_date = request.POST.get("order_date")
     order_status = request.POST.get("order_status")
-    if order_status == 'Complete':
+    if order_status == OrderStatus.COMPLETE:
         order_datetime = datetime.datetime.strptime(order_date, "%Y-%m-%dT%H:%M:%SZ")
         subscription_until = order_datetime.replace(tzinfo=UTC) + datetime.timedelta(days=settings.SUBSCRIPTOIN_DAYS)
         try:
