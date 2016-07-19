@@ -9,7 +9,7 @@ from opaque_keys.edx.keys import CourseKey
 from config_models.admin import ConfigurationModelAdmin
 from student.models import (
     UserProfile, UserTestGroup, CourseEnrollmentAllowed, DashboardConfiguration, CourseEnrollment, Registration,
-    PendingNameChange, CourseAccessRole, LinkedInAddToProfileConfiguration
+    PendingNameChange, CourseAccessRole, LinkedInAddToProfileConfiguration, Subscriber
 )
 from student.roles import REGISTERED_ACCESS_ROLES
 
@@ -164,6 +164,13 @@ class UserProfileAdmin(admin.ModelAdmin):
         model = UserProfile
 
 
+class SubscriberAdmin(admin.ModelAdmin):
+    list_display = ('user', 'created', 'subscription_until',)
+
+    class Meta(object):
+        model = Subscriber
+
+
 admin.site.register(UserTestGroup)
 
 admin.site.register(CourseEnrollmentAllowed)
@@ -181,3 +188,5 @@ admin.site.register(LinkedInAddToProfileConfiguration, LinkedInAddToProfileConfi
 admin.site.register(CourseEnrollment, CourseEnrollmentAdmin)
 
 admin.site.register(UserProfile, UserProfileAdmin)
+
+admin.site.register(Subscriber, SubscriberAdmin)
