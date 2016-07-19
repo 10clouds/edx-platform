@@ -575,6 +575,10 @@ COURSE_SETTINGS = {
     }
 }
 
+# Subscription course key
+SUBSCRIPTION_COURSE_KEY = 'course-v1:Edevate+SUBSCRIPTION+COURSE'
+SUBSCRIPTOIN_DAYS = 30
+
 # IP addresses that are allowed to reload the course, etc.
 # TODO (vshnayder): Will probably need to change as we get real access control in.
 LMS_MIGRATION_ALLOWED_IPS = []
@@ -1324,6 +1328,12 @@ instructor_dash_js = (
     sorted(rooted_glob(PROJECT_ROOT / 'static', 'js/instructor_dashboard/**/*.js'))
 )
 
+subscription_js = [
+    'js/subscription/views/error_view.js',
+    'js/subscription/views/pay_view.js',
+    'js/subscription/subscribe.js',
+]
+
 verify_student_js = [
     'js/sticky_filter.js',
     'js/query-params.js',
@@ -1585,6 +1595,10 @@ PIPELINE_JS = {
     'dashboard': {
         'source_filenames': dashboard_js,
         'output_filename': 'js/dashboard.js'
+    },
+    'subscription': {
+        'source_filenames': subscription_js,
+        'output_filename': 'js/subscription.js'
     },
     'verify_student': {
         'source_filenames': verify_student_js,
@@ -2109,6 +2123,8 @@ MKTG_URL_LINK_MAP = {
 
     # Verified Certificates
     'WHAT_IS_VERIFIED_CERT': 'verified-certificate',
+    # Subscription
+    'WHAT_IS_SUBSCRIPTION': 'subscription-faq'
 }
 
 STATIC_TEMPLATE_VIEW_DEFAULT_FILE_EXTENSION = 'html'

@@ -285,6 +285,10 @@ def get_course_enrollments(user, org_to_include, orgs_to_exclude):
             )
             continue
 
+        # Skip subscription course
+        if unicode(course_overview.id) == unicode(settings.SUBSCRIPTION_COURSE_KEY):
+            continue
+
         # If we are in a Microsite, then filter out anything that is not
         # attributed (by ORG) to that Microsite.
         if org_to_include and course_overview.location.org != org_to_include:
@@ -708,7 +712,7 @@ def dashboard(request):
         )
     else:
         redirect_message = ''
-
+    subscription_course_key = CourseKey.from_string(unicode(settings.SUBSCRIPTION_COURSE_KEY))
     context = {
         'enrollment_message': enrollment_message,
         'redirect_message': redirect_message,
@@ -742,6 +746,9 @@ def dashboard(request):
         'disable_courseware_js': True,
         'xseries_credentials': xseries_credentials,
         'show_program_listing': ProgramsApiConfig.current().show_program_listing,
+        'is_active_subscription': user.subscriber.is_active_subscription,
+        'subscription_course_key': settings.SUBSCRIPTION_COURSE_KEY,
+        'is_subscription_course_enrolled': CourseEnrollment.is_enrolled(user, subscription_course_key)
     }
 
     ecommerce_service = EcommerceService()
@@ -1051,6 +1058,10 @@ def change_enrollment(request, check_access=True):
         if redirect_url:
             return HttpResponse(redirect_url)
 
+        if user.subscriber.is_active_subscription:
+            CourseEnrollment.enroll(user, course_id, check_access=False, mode='honor')
+            return HttpResponse()
+
         # Check that auto enrollment is allowed for this course
         # (= the course is NOT behind a paywall)
         if CourseMode.can_auto_enroll(course_id):
@@ -1091,6 +1102,42 @@ def change_enrollment(request, check_access=True):
         return HttpResponse()
     else:
         return HttpResponseBadRequest(_("Enrollment action is invalid"))
+
+
+@transaction.non_atomic_requests
+@require_POST
+@outer_atomic(read_committed=True)
+def update_subscription(request):
+    """
+    Modify the subscription_until date.
+
+    Args:
+        request (`Request`): The Django request object
+
+    Returns:
+        Response
+
+    """
+    # Get the user
+    user = request.user
+
+    # Ensure the user is authenticated
+    if not user.is_authenticated():
+        return HttpResponseForbidden()
+
+    order_date = request.POST.get("order_date")
+    order_status = request.POST.get("order_status")
+    if order_status == 'Complete':
+        order_datetime = datetime.datetime.strptime(order_date, "%Y-%m-%dT%H:%M:%SZ")
+        subscription_until = order_datetime.replace(tzinfo=UTC) + datetime.timedelta(days=settings.SUBSCRIPTOIN_DAYS)
+        try:
+            user.subscriber.subscription_until = subscription_until
+            user.subscriber.save()
+        except Exception as e:
+            log.error(u"{!r}".format(e))
+            return HttpResponseBadRequest(_("Could not update subscription data"))
+
+    return HttpResponse()
 
 
 # Need different levels of logging

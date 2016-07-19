@@ -77,6 +77,53 @@ from openedx.core.djangolib.markup import Text, HTML
 <main id="main" aria-label="Content" tabindex="-1">
     <section class="container dashboard" id="dashboard-main">
       <section class="my-courses" id="my-courses">
+
+        <header class="wrapper-header-courses">
+          <h2 class="header-courses">${_("Subscription")}</h2>
+        </header>
+
+        <ul class="listing-courses" style="margin-bottom:30px;">
+          <li class="course-item">
+            <div class="course-container">
+            <article class="course">
+              <section class="details">
+                <div class="wrapper-course-details" style="width:95%">
+                  <h3 class="course-title">
+                        <a href="#">${_("Subscription is")}
+                        % if is_active_subscription:
+                          ${_("active")}
+                        % else:
+                          ${_("inactive")}
+                        % endif</a>
+                  </h3>
+                  <div class="course-info">
+                    <span class="info-university"></span>
+                    <span class="info-course-id"></span>
+                    % if is_active_subscription:
+                      <span class="info-date-block" data-tooltip="Hi">
+                        Started - ${user.subscriber.created.strftime('%Y/%m/%d %H:%M')}
+                      </span>
+                      <span class="info-date-block" data-tooltip="Hi">
+                        Until - ${user.subscriber.subscription_until.strftime('%Y/%m/%d %H:%M')}
+                      </span>
+                    % endif
+                  </div>
+                  <div class="wrapper-course-actions">
+                    <div class="course-actions">
+                      % if is_active_subscription and is_subscription_course_enrolled:
+                        <a id="unenroll-0" href="#unenroll-modal" class="action-unenroll enter-course" rel="leanModal" data-course-id="${subscription_course_key}" data-course-number="" data-course-name="" data-dashboard-index="0" data-track-info="Are you sure you want to cancel your subscription?" data-refund-info="You will not be refunded the amount you paid.">Cancel<span class="sr">&nbsp;</span></a>
+                      % elif not is_active_subscription and not is_subscription_course_enrolled:
+                        <a href="/verify_student/subscribe/" class="enter-course">${_("Subscribe")}<span class="sr">&nbsp;</span></a>
+                      % endif
+                    </div>
+                  </div>
+                </div>
+              </section>
+            </article>
+            </div>
+          </li>
+        </ul>
+
         <header class="wrapper-header-courses">
           <h2 class="header-courses">${_("My Courses")}</h2>
         </header>

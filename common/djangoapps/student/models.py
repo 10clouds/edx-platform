@@ -398,6 +398,21 @@ class UserProfile(models.Model):
         return cls.PROFILE_COUNTRY_CACHE_KEY.format(user_id=user_id)
 
 
+class Subscriber(models.Model):
+    user = models.OneToOneField(User, unique=True, db_index=True,
+                                related_name='subscriber')
+    created = models.DateTimeField(auto_now_add=True, null=True)
+    subscription_until = models.DateTimeField(null=True)
+    allowed_courses = models.TextField(blank=True, null=True)
+
+    @property
+    def is_active_subscription(self):
+        if not self.subscription_until:
+            return False
+
+        return datetime.now(UTC) < self.subscription_until
+
+
 @receiver(models.signals.post_save, sender=UserProfile)
 def invalidate_user_profile_country_cache(sender, instance, **kwargs):  # pylint:   disable=unused-argument, invalid-name
     """Invalidate the cache of country in UserProfile model. """

@@ -699,6 +699,176 @@ class PayAndVerifyView(View):
             return render_to_response("verify_student/missed_deadline.html", context)
 
 
+class SubscriptionView(View):
+
+    @method_decorator(login_required)
+    def get(self, request):
+        """
+        Render the payment flow.
+
+        Arguments:
+            request (HttpRequest): The request object.
+
+        Returns:
+            HttpResponse
+
+        Raises:
+            Http404: The course does not exist.
+        """
+        # Get the course key
+        course_key = CourseKey.from_string(settings.SUBSCRIPTION_COURSE_KEY)
+        course = modulestore().get_course(course_key)
+
+        # Verify that the course exists
+        if course is None:
+            log.warn(u"Could not find subscription dummy course with ID %s.", course_key)
+            raise Http404
+
+        # Check whether the user has access to subscription course
+        # based on country access rules.
+        redirect_url = embargo_api.redirect_if_blocked(
+            course_key,
+            user=request.user,
+            ip_address=get_ip(request),
+            url=request.path
+        )
+        if redirect_url:
+            return redirect(redirect_url)
+
+        # Retrieve the relevant course mode for the payment flow.
+        relevant_course_mode = self._get_paid_mode(course_key)
+
+        # If we can find a relevant course mode, then log that we're entering the flow
+        # Otherwise, this course does not support payment, so respond with a 404.
+        if relevant_course_mode is not None:
+            log.info(
+                u"Entering payment flow for user '%s', course '%s', mode '%s'",
+                request.user.id, course_key, relevant_course_mode
+            )
+        else:
+            log.warn(
+                u"No paid course mode found for subscription course '%s' for payment flow request",
+                course_key
+            )
+            raise Http404
+
+        already_paid, is_active = self._check_enrollment(request.user, course_key)
+        # Redirect the user to a more appropriate page if the
+        # messaging won't make sense based on the user's
+        # enrollment / payment status.
+        redirect_response = self._redirect_if_necessary(already_paid,
+                                                        is_active)
+        if redirect_response is not None:
+            return redirect_response
+
+        full_name = (
+            request.user.profile.name
+            if request.user.profile.name
+            else ""
+        )
+
+        # get available payment processors
+        if relevant_course_mode.sku:
+            # transaction will be conducted via ecommerce service
+            processors = ecommerce_api_client(request.user).payment.processors.get()
+        else:
+            # transaction will be conducted using legacy shopping cart
+            processors = [settings.CC_PROCESSOR_NAME]
+        log.info(
+            u"Available payment processors for subscription payment flow '%s'",
+            processors
+        )
+        # Render the top-level page
+        context = {
+            'course': course,
+            'course_key': unicode(course_key),
+            'course_mode': relevant_course_mode,
+            'disable_courseware_js': True,
+            'is_active': json.dumps(request.user.is_active),
+            'platform_name': settings.PLATFORM_NAME,
+            'processors': processors,
+            'user_full_name': full_name,
+            'nav_hidden': False
+        }
+
+        return render_to_response("verify_student/subscription/pay.html", context)
+
+    def _redirect_if_necessary(self, already_paid, is_active):
+        """Redirect the user to a more appropriate page if necessary.
+
+        Arguments:
+            already_paid (bool): Whether the user is enrolled in a paid
+                course mode.
+            is_active (bool): Whether the user is enrolled
+        Returns:
+            HttpResponse or None
+        """
+        url = None
+        if already_paid and is_active:
+            # If they've already paid and verified, there's nothing else to do,
+            # so redirect them to the dashboard.
+            url = reverse('dashboard')
+
+        # Redirect if necessary, otherwise implicitly return None
+        if url is not None:
+            return redirect(url)
+
+    def _get_paid_mode(self, course_key):
+        """
+        Retrieve the paid course mode for subscription course.
+
+        Arguments:
+            course_key (CourseKey): The location of the course.
+
+        Returns:
+            CourseMode tuple
+
+        """
+        # Retrieve all the modes at once to reduce the number of database queries
+        all_modes, unexpired_modes = CourseMode.all_and_unexpired_modes_for_courses([course_key])
+
+        # Retrieve the first mode that matches the following criteria:
+        #  * Unexpired
+        #  * Price > 0
+        #  * Not credit
+        for mode in unexpired_modes[course_key]:
+            if mode.min_price > 0 and not CourseMode.is_credit_mode(mode):
+                return mode
+
+        # Otherwise, find the first expired mode
+        for mode in all_modes[course_key]:
+            if mode.min_price > 0:
+                return mode
+
+        # Otherwise, return None and so the view knows to respond with a 404.
+        return None
+
+    def _check_enrollment(self, user, course_key):
+        """Check whether the user has an active enrollment and has paid.
+
+        If a user is enrolled in a paid course mode, we assume
+        that the user has paid.
+
+        Arguments:
+            user (User): The user to check.
+            course_key (CourseKey): The key of the course to check.
+
+        Returns:
+            Tuple `(has_paid, is_active)` indicating whether the user
+            has paid and whether the user has an active account.
+
+        """
+        enrollment_mode, is_active = CourseEnrollment.enrollment_mode_for_user(user, course_key)
+        has_paid = False
+
+        if enrollment_mode is not None and is_active:
+            all_modes = CourseMode.modes_for_course_dict(course_key, include_expired=True)
+            course_mode = all_modes.get(enrollment_mode)
+            has_paid = (course_mode and course_mode.min_price > 0)
+
+        return (has_paid, bool(is_active))
+
+
 def checkout_with_ecommerce_service(user, course_key, course_mode, processor):
     """ Create a new basket and trigger immediate checkout, using the E-Commerce API. """
     course_id = unicode(course_key)
