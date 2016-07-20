@@ -17,27 +17,15 @@ var edx = edx || {};
         initialize: function( obj ) {
             this.errorModel = obj.errorModel || null;
             this.courseKey = obj.courseKey || null;
-            this.stepData = obj.subscriptionData;
+            this.subscriptionData = obj.subscriptionData;
         },
 
         render: function() {
-            var stepView, stepEl;
-
-            // Get or create the step container
-            stepEl = $("#current-step-container");
-            if (!stepEl.length) {
-                stepEl = $('<div id="current-step-container"></div>').appendTo(this.el);
-            }
-
             var templateHtml = $( "#" + this.templateName + "-tpl" ).html();
-            // Allow subclasses to add additional information
-            // to the template context, perhaps asynchronously.
             this.updateContext( this.templateContext() ).done(
                 function( templateContext ) {
                     // Render the template into the DOM
-                    $( this.el ).html( _.template( templateHtml, templateContext ) );
-
-                    // Allow subclasses to install custom event handlers
+                    edx.HtmlUtils.setHtml( $(this.el), edx.HtmlUtils.template(templateHtml)( templateContext ) );
                     this.postRender();
                 }
             ).fail( _.bind( this.handleError, this ) );
@@ -54,7 +42,7 @@ var edx = edx || {};
         },
 
         templateContext: function() {
-            return _.extend( this.defaultContext(), this.stepData );
+            return _.extend( this.subscriptionData );
         },
 
         updateContext: function( templateContext ) {
@@ -64,19 +52,6 @@ var edx = edx || {};
                     defer.resolveWith( view, [ templateContext ]);
                 }
             ).promise();
-        },
-
-        defaultContext: function() {
-            return {
-                isActive: true,
-                minPrice: 0,
-                sku: '',
-                currency: 'usd',
-                courseName: '',
-                platformName: '',
-                alreadyVerified: false,
-                courseModeSlug: 'audit'
-            };
         },
 
         _getPaymentButtonText: function(processorName) {
@@ -148,7 +123,7 @@ var edx = edx || {};
                 postData = {
                     'processor': event.target.id,
                     'contribution': paymentAmount,
-                    'course_id': this.stepData.courseKey,
+                    'course_id': this.subscriptionData.courseKey,
                     'sku': this.templateContext().sku
                 };
 
