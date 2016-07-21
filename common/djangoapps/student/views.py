@@ -112,7 +112,7 @@ from student.helpers import (
     DISABLE_UNENROLL_CERT_STATES,
 )
 from student.cookies import set_logged_in_cookies, delete_logged_in_cookies
-from student.models import anonymous_id_for_user
+from student.models import anonymous_id_for_user, Subscriber
 from shoppingcart.models import DonationConfiguration, CourseRegistrationCode
 
 from embargo import api as embargo_api
@@ -1609,7 +1609,11 @@ def _do_create_account(form, custom_form=None):
     except Exception:  # pylint: disable=broad-except
         log.exception("UserProfile creation failed for user {id}.".format(id=user.id))
         raise
-
+    try:
+        Subscriber.objects.create(user=user)
+    except Exception:  # pylint: disable=broad-except
+        log.exception("Subscriber creation failed for user {id}".format(id=user.id))
+        raise
     return (user, profile, registration)
 
 

@@ -405,6 +405,9 @@ class Subscriber(models.Model):
     subscription_until = models.DateTimeField(null=True)
     allowed_courses = models.TextField(blank=True, null=True)
 
+    def __unicode__(self):
+        return self.user.username
+
     @property
     def is_active_subscription(self):
         if not self.subscription_until:
