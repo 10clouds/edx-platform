@@ -180,4 +180,3 @@ jsonfield==1.0.3
 
 # Inlines CSS styles into HTML for email notifications.
 pynliner==0.5.2
-edx-auth-backends==0.5.0

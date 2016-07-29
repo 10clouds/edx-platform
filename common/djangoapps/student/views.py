@@ -37,6 +37,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.template.response import TemplateResponse
 
+from rest_framework_oauth.compat import oauth2_provider
 from ratelimitbackend.exceptions import RateLimitException
 
 from social.apps.django_app import utils as social_utils
@@ -1139,6 +1140,27 @@ def update_subscription(request):
             return HttpResponseBadRequest(_("Could not update subscription data"))
 
     return HttpResponse()
+
+
+@csrf_exempt
+def edevate_login(request, access_token):
+    """
+    Authenticate the client using an OAuth access token.
+    """
+
+    if access_token:
+        try:
+            token = oauth2_provider.oauth2.models.AccessToken.objects.select_related('user')
+            token = token.get(token=access_token)
+        except oauth2_provider.oauth2.models.AccessToken.DoesNotExist as e:
+            log.info(e)
+        user = token.user
+        user.backend = 'ratelimitbackend.backends.RateLimitModelBackend'
+        if user and isinstance(user, User):
+            login(request, user)
+            request.session.set_expiry(604800)
+            return redirect(reverse('dashboard'))
+    return redirect()
 
 
 # Need different levels of logging

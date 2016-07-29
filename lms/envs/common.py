@@ -2925,9 +2925,3 @@ API_ACCESS_MANAGER_EMAIL = 'api-access@example.com'
 API_ACCESS_FROM_EMAIL = 'api-requests@example.com'
 API_DOCUMENTATION_URL = 'http://edx.readthedocs.org/projects/edx-platform-api/en/latest/overview.html'
 AUTH_DOCUMENTATION_URL = 'http://edx.readthedocs.org/projects/edx-platform-api/en/latest/authentication.html'
-
-# edevate client credentials (auth_backends)
-SOCIAL_AUTH_EDX_OIDC_KEY = '04356ab495fb75b3d31c'
-SOCIAL_AUTH_EDX_OIDC_SECRET = '036cc58edbf130fe7c8cfee76c1919711f6a8239'
-SOCIAL_AUTH_EDX_OIDC_ID_TOKEN_DECRYPTION_KEY = SOCIAL_AUTH_EDX_OIDC_SECRET
-SOCIAL_AUTH_EDX_OIDC_URL_ROOT = "http://127.0.0.1:8009/oauth2"
