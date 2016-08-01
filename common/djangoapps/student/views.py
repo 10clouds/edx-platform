@@ -1154,13 +1154,14 @@ def edevate_login(request, access_token):
             token = token.get(token=access_token)
         except oauth2_provider.oauth2.models.AccessToken.DoesNotExist as e:
             log.info(e)
-        user = token.user
-        user.backend = 'ratelimitbackend.backends.RateLimitModelBackend'
-        if user and isinstance(user, User):
-            login(request, user)
-            request.session.set_expiry(604800)
-            return redirect(reverse('dashboard'))
-    return redirect()
+        else:
+            user = token.user
+            user.backend = 'ratelimitbackend.backends.RateLimitModelBackend'
+            if user and isinstance(user, User):
+                login(request, user)
+                request.session.set_expiry(604800)
+                return redirect(reverse('dashboard'))
+    return redirect(settings.EDEVATE_BASE_URL)
 
 
 # Need different levels of logging
