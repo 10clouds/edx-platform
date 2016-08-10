@@ -579,6 +579,9 @@ COURSE_SETTINGS = {
 SUBSCRIPTION_COURSE_KEY = 'course-v1:Edevate+SUBSCRIPTION+COURSE'
 SUBSCRIPTOIN_DAYS = 30
 
+OPENEDX_TUTORIAL_URL = 'http://50.97.47.83:18000/courses/course-v1:edX+DemoX+Demo_Course/about'
+CMS_BASE_URL = 'http://50.97.47.83:18010'
+
 # IP addresses that are allowed to reload the course, etc.
 # TODO (vshnayder): Will probably need to change as we get real access control in.
 LMS_MIGRATION_ALLOWED_IPS = []

@@ -1143,10 +1143,16 @@ def update_subscription(request):
 
 
 @csrf_exempt
-def edevate_login(request, access_token):
+@require_POST
+def edevate_login(request):
     """
     Authenticate the client using an OAuth access token.
     """
+    from rest_framework_oauth.compat import oauth2_provider
+
+    access_token = request.POST.get('access_token')
+    action = request.POST.get('action')
+    next_page = reverse('dashboard')
 
     if access_token:
         try:
@@ -1160,7 +1166,13 @@ def edevate_login(request, access_token):
             if user and isinstance(user, User):
                 login(request, user)
                 request.session.set_expiry(604800)
-                return redirect(reverse('dashboard'))
+                if action == "courses":
+                    next_page = reverse('courses')
+                if action == "tutorial":
+                    next_page = settings.OPENEDX_TUTORIAL_URL
+                if action == "studio":
+                    next_page = settings.CMS_BASE_URL
+                return redirect(next_page)
     return redirect(settings.EDEVATE_BASE_URL)
 
 
