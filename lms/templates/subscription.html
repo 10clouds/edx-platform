@@ -1,0 +1,86 @@
+## mako
+<%inherit file="main.html" />
+<%namespace name='static' file='static_content.html'/>
+
+<%!
+from django.core.urlresolvers import reverse
+from django.utils.translation import ugettext as _
+
+from microsite_configuration.templatetags.microsite import platform_name
+%>
+
+<%block name="pagetitle">${_("Subscription page")}</%block>
+
+<section class="container subscription" id="subscription-main">
+    <header class="subscription-header">
+      <h2>${_("Subscription")}</h2>
+    </header>
+
+    <div class="subscription-container">
+    <article class="subscription">
+      <section class="details">
+        <div class="wrapper-subscription-details">
+          <h3 class="subscription-title">${_("Subscription is")}
+                % if is_active_subscription:
+                  ${_("active")}
+                % else:
+                  ${_("inactive")}
+                % endif
+          </h3>
+          <div class="subscription-info">
+            % if is_active_subscription:
+              <span class="info-date-block">
+                Started - ${request.user.subscriber.created.strftime('%Y/%m/%d %H:%M')}
+              </span>
+              <span class="info-date-block">
+                Until - ${request.user.subscriber.subscription_until.strftime('%Y/%m/%d %H:%M')}
+              </span>
+            % endif
+          </div>
+          <div class="wrapper-subscription-actions">
+            <div class="subscription-actions">
+              % if is_active_subscription and is_subscription_course_enrolled:
+                <a id="unenroll-0" href="#unenroll-modal" class="action-unenroll enter-course" rel="leanModal">Cancel<span class="sr">&nbsp;</span></a>
+              % elif not is_active_subscription and not is_subscription_course_enrolled:
+                <a href="${reverse('subscribe_student')}" class="enter-course">Subscribe<span class="sr">&nbsp;</span></a>
+              % endif
+            </div>
+          </div>
+        </div>
+      </section>
+    </article>
+    </div>
+</section>
+
+
+<section id="unenroll-modal" class="modal unenroll-modal subscription-modal" aria-hidden="true">
+  <div class="inner-wrapper" role="dialog" aria-labelledby="unenrollment-modal-title">
+    <button class="close-modal">
+      <i class="icon fa fa-remove"></i>
+      <span class="sr">
+        ## Translators: this is a control to allow users to exit out of this modal interface (a menu or piece of UI that takes the full focus of the screen)
+        ${_("Close")}
+      </span>
+    </button>
+
+    <header>
+      <h2 id="unenrollment-modal-title">
+        <span id='track-info'>Are you sure you want to cancel your subscription?</span>
+        <span id='refund-info'>You will not be refunded the amount you paid.</span>
+        <span class="sr">,
+          ## Translators: this text gives status on if the modal interface (a menu or piece of UI that takes the full focus of the screen) is open or not
+          ${_("window open")}
+        </span>
+      </h2>
+      <hr/>
+    </header>
+    <div id="unenroll_error" class="modal-form-error"></div>
+    <form id="unenroll_form" method="post" data-remote="true" action="${reverse('change_enrollment')}">
+      <input name="course_id" id="unenroll_course_id" type="hidden" value="${subscription_course_key}"/>
+      <input name="enrollment_action" type="hidden" value="unenroll" />
+      <div class="submit">
+        <input name="submit" type="submit" value="${_("Unenroll")}" />
+      </div>
+    </form>
+  </div>
+</section>
