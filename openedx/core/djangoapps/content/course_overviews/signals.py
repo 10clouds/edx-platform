@@ -6,7 +6,7 @@ from django.dispatch.dispatcher import receiver
 
 from .models import CourseOverview
 from .connector import EdevateDbConnector
-from xmodule.modulestore.django import SignalHandler
+from xmodule.modulestore.django import SignalHandler, modulestore
 
 
 @receiver(SignalHandler.course_published)
@@ -45,5 +45,5 @@ def _create_edevate_course_for_verification(sender, course_key, **kwargs):  # py
         edevate_db.update_or_create_verification_course(course_key,
                                                         course_author.email)
         edevate_db.close()
-    except User.DoseNotExist:
+    except User.DoesNotExist:
         pass
