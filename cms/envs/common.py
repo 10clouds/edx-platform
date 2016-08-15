@@ -1193,3 +1193,7 @@ USERNAME_PATTERN = r'(?P<username>[\w.@+-]+)'
 
 # Partner support link for CMS footer
 PARTNER_SUPPORT_EMAIL = ''
+
+# Subscription course key
+SUBSCRIPTION_COURSE_KEY = 'course-v1:Edevate+SUBSCRIPTION+COURSE'
+SUBSCRIPTOIN_DAYS = 30
