@@ -1,7 +1,9 @@
 """
 Student Views
 """
+import base64
 import datetime
+import hashlib
 import logging
 import uuid
 import json
@@ -1149,6 +1151,17 @@ def update_subscription(request):
     return HttpResponse()
 
 
+def get_openedx_encrypted_access_token(access_token):
+    if not access_token:
+        return None
+
+    salt = base64.urlsafe_b64encode(datetime.datetime.now(UTC).strftime("%d-%m-%Y_%H"))
+    t_sha = hashlib.sha512()
+    t_sha.update(access_token+salt)
+    hashed_token = base64.urlsafe_b64encode(t_sha.digest())
+    return hashed_token
+
+
 @csrf_exempt
 @require_POST
 def edevate_login(request):
@@ -1157,29 +1170,27 @@ def edevate_login(request):
     """
     from rest_framework_oauth.compat import oauth2_provider
 
-    access_token = request.POST.get('access_token')
+    encrypted_access_token = request.POST.get('access_token')
     action = request.POST.get('action')
-    next_page = reverse('dashboard')
+    next_page = request.POST.get('next_page', reverse('dashboard'))
 
-    if access_token:
-        try:
-            token = oauth2_provider.oauth2.models.AccessToken.objects.select_related('user')
-            token = token.get(token=access_token)
-        except oauth2_provider.oauth2.models.AccessToken.DoesNotExist as e:
-            log.info(e)
-        else:
-            user = token.user
-            user.backend = 'ratelimitbackend.backends.RateLimitModelBackend'
-            if user and isinstance(user, User):
-                login(request, user)
-                request.session.set_expiry(604800)
-                if action == "courses":
-                    next_page = reverse('courses')
-                if action == "tutorial":
-                    next_page = settings.OPENEDX_TUTORIAL_URL
-                if action == "studio":
-                    next_page = settings.CMS_BASE_URL
-                return redirect(next_page)
+    if encrypted_access_token:
+        tokens = oauth2_provider.oauth2.models.AccessToken.objects.select_related('user')
+        for token in tokens:
+            if encrypted_access_token == get_openedx_encrypted_access_token(token.token):
+                user = token.user
+                user.backend = 'ratelimitbackend.backends.RateLimitModelBackend'
+                if user and isinstance(user, User):
+                    login(request, user)
+                    request.session.set_expiry(604800)
+                    if action == "courses":
+                        next_page = reverse('courses')
+                    if action == "tutorial":
+                        next_page = settings.OPENEDX_TUTORIAL_URL
+                    if action == "studio":
+                        next_page = settings.CMS_BASE_URL
+                    return redirect(next_page)
+    log.info("Access Token does not exist")
     return redirect(settings.EDEVATE_BASE_URL)
 
 
