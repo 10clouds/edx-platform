@@ -2929,5 +2929,5 @@ API_ACCESS_FROM_EMAIL = 'api-requests@example.com'
 API_DOCUMENTATION_URL = 'http://edx.readthedocs.org/projects/edx-platform-api/en/latest/overview.html'
 AUTH_DOCUMENTATION_URL = 'http://edx.readthedocs.org/projects/edx-platform-api/en/latest/authentication.html'
 
-EDEVATE_BASE_URL = 'http://50.97.47.83:18000/'
+EDEVATE_BASE_URL = 'http://ec2-23-22-165-116.compute-1.amazonaws.com/'
 EDEVATE_AFTER_LOGOUT_URL = '{}university/'.format(EDEVATE_BASE_URL)
