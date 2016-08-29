@@ -821,3 +821,4 @@ EDEVATE_MYSQL_PASSWD = 'edevate12'
 EDEVATE_MYSQL_DB_NAME = 'edevate_devel'
 
 EDEVATE_BASE_URL = 'http://ec2-23-22-165-116.compute-1.amazonaws.com/'
+EDEVATE_AFTER_LOGOUT_URL = '{}university/'.format(EDEVATE_BASE_URL)

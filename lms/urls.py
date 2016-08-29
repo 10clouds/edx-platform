@@ -798,7 +798,7 @@ if settings.FEATURES.get('AUTH_USE_SHIB'):
 if settings.FEATURES.get('AUTH_USE_CAS'):
     urlpatterns += (
         url(r'^cas-auth/login/$', 'external_auth.views.cas_login', name="cas-login"),
-        url(r'^cas-auth/logout/$', 'django_cas.views.logout', {'next_page': '/'}, name="cas-logout"),
+        url(r'^cas-auth/logout/$', 'django_cas.views.logout', {'next_page': settings.EDEVATE_AFTER_LOGOUT_URL}, name="cas-logout"),
     )
 
 if settings.FEATURES.get('RESTRICT_ENROLL_BY_REG_METHOD'):
