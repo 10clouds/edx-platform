@@ -1464,7 +1464,7 @@ def logout_user(request):
     if settings.FEATURES.get('AUTH_USE_CAS'):
         target = reverse('cas-logout')
     else:
-        target = settings.EDEVATE_BASE_URL
+        target = settings.EDEVATE_AFTER_LOGOUT_URL
     response = redirect(target)
 
     delete_logged_in_cookies(response)
