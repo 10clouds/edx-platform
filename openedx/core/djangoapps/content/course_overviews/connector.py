@@ -44,7 +44,7 @@ class EdevateDbConnector:
         self.cursor.execute("""SELECT *
                                FROM openedx_edxcourseverification
                                WHERE openedx_course_id = '{}'
-                               AND published_by='{}';
+                               AND published_by_id='{}';
                                """.format(openedx_course_id,
                                           published_by)
                             )

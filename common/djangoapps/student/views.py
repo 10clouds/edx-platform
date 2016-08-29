@@ -53,7 +53,7 @@ from shoppingcart.api import order_history
 from student.models import (
     Registration, UserProfile,
     PendingEmailChange, CourseEnrollment, CourseEnrollmentAttribute, unique_id_for_user,
-    CourseEnrollmentAllowed, UserStanding, LoginFailures,
+    CourseEnrollmentAllowed, UserStanding, LoginFailures, Subscriber,
     create_comments_service_user, PasswordHistory, UserSignupSource,
     DashboardConfiguration, LinkedInAddToProfileConfiguration, ManualEnrollmentAudit, ALLOWEDTOENROLL_TO_ENROLLED)
 from student.forms import AccountCreationForm, PasswordResetFormNoActive, get_registration_extension_form
@@ -716,7 +716,7 @@ def dashboard(request):
         )
     else:
         redirect_message = ''
-    subscription_course_key = CourseKey.from_string(unicode(settings.SUBSCRIPTION_COURSE_KEY))
+
     context = {
         'enrollment_message': enrollment_message,
         'redirect_message': redirect_message,
@@ -749,10 +749,7 @@ def dashboard(request):
         'course_programs': course_programs,
         'disable_courseware_js': True,
         'xseries_credentials': xseries_credentials,
-        'show_program_listing': ProgramsApiConfig.current().show_program_listing,
-        'is_active_subscription': user.subscriber.is_active_subscription,
-        'subscription_course_key': settings.SUBSCRIPTION_COURSE_KEY,
-        'is_subscription_course_enrolled': CourseEnrollment.is_enrolled(user, subscription_course_key)
+        'show_program_listing': ProgramsApiConfig.current().show_program_listing
     }
 
     ecommerce_service = EcommerceService()
@@ -763,6 +760,16 @@ def dashboard(request):
         })
 
     return render_to_response('dashboard.html', context)
+
+
+def subscription_page(request):
+    subscription_course_key = CourseKey.from_string(unicode(settings.SUBSCRIPTION_COURSE_KEY))
+    context = {
+        'is_active_subscription': request.user.subscriber.is_active_subscription,
+        'subscription_course_key': settings.SUBSCRIPTION_COURSE_KEY,
+        'is_subscription_course_enrolled': CourseEnrollment.is_enrolled(request.user, subscription_course_key)
+    }
+    return render_to_response('subscription.html', context)
 
 
 def _create_recent_enrollment_message(course_enrollments, course_modes):  # pylint: disable=invalid-name
@@ -1655,7 +1662,11 @@ def _do_create_account(form, custom_form=None):
     except Exception:  # pylint: disable=broad-except
         log.exception("UserProfile creation failed for user {id}.".format(id=user.id))
         raise
-
+    try:
+        Subscriber.objects.create(user=user)
+    except Exception:  # pylint: disable=broad-except
+        log.exception("Subscriber creation failed for user {id}".format(id=user.id))
+        raise
     return (user, profile, registration)
 
 

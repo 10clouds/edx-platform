@@ -58,13 +58,15 @@ var edx = edx || {};
 
         _getPaymentButtonText: function(processorName) {
             if (processorName.toLowerCase().substr(0, 11)=='cybersource') {
-                return gettext('Checkout');
+                return gettext('Pay');
             } else if (processorName.toLowerCase()=='paypal') {
-                return gettext('Checkout with PayPal');
+                return gettext('Pay with PayPal');
+            } else if (processorName.toLowerCase()=='braintree') {
+                return gettext('Credit Card');
             } else {
                 // This is mainly for testing as no other processors are supported right now.
                 // Translators: 'processor' is the name of a third-party payment processing vendor (example: "PayPal")
-                return interpolate_text(gettext('Checkout with {processor}'), {processor: processorName});
+                return interpolate_text(gettext('Pay with {processor}'), {processor: processorName});
             }
         },
 
