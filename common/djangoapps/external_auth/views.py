@@ -23,7 +23,7 @@ if settings.FEATURES.get('AUTH_USE_CAS'):
     from django_cas.views import login as django_cas_login
 
 from student.helpers import get_next_url_for_login_page
-from student.models import UserProfile
+from student.models import UserProfile, Subscriber
 
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden
 from django.utils.http import urlquote, is_safe_url
@@ -481,6 +481,9 @@ def cas_login(request, next_page=None, required=False):
         UserProfile.objects.get_or_create(
             user=user,
             defaults={'name': user.username}
+        )
+        Subscriber.objects.get_or_create(
+            user=user
         )
 
     return ret
