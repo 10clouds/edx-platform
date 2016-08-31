@@ -489,6 +489,38 @@ def cas_login(request, next_page=None, required=False):
     return ret
 
 
+def _cas_logout_url(request, next_page=None):
+    """Generates CAS logout URL"""
+    from urllib import urlencode
+    from urlparse import urljoin
+
+    url = urljoin(settings.CAS_SERVER_URL, 'logout')
+    if next_page:
+        protocol = ('http://', 'https://')[request.is_secure()]
+        host = request.get_host()
+
+        if 'http' in next_page:
+            url += '?' + urlencode({'service': next_page})
+        else:
+            url += '?' + urlencode({'url': protocol + host + next_page})
+    return url
+
+
+def cas_logout(request, next_page=None):
+    """Redirects to CAS logout page"""
+
+    from django.contrib.auth import logout
+    from django_cas.views import _redirect_url
+
+    logout(request)
+    if not next_page:
+        next_page = _redirect_url(request)
+    if settings.CAS_LOGOUT_COMPLETELY:
+        return HttpResponseRedirect(_cas_logout_url(request, next_page))
+    else:
+        return HttpResponseRedirect(next_page)
+
+
 # -----------------------------------------------------------------------------
 # Shibboleth (Stanford and others.  Uses *Apache* environment variables)
 # -----------------------------------------------------------------------------

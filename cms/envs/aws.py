@@ -235,11 +235,12 @@ if "TRACKING_IGNORE_URL_PATTERNS" in ENV_TOKENS:
 
 # Django CAS external authentication settings
 CAS_EXTRA_LOGIN_PARAMS = ENV_TOKENS.get("CAS_EXTRA_LOGIN_PARAMS", None)
+CAS_LOGOUT_COMPLETELY = ENV_TOKENS.get("CAS_LOGOUT_COMPLETELY", True)
 if FEATURES.get('AUTH_USE_CAS'):
     CAS_SERVER_URL = ENV_TOKENS.get("CAS_SERVER_URL", None)
     AUTHENTICATION_BACKENDS = (
         'django.contrib.auth.backends.ModelBackend',
-        'django_cas.backends.CASBackend',
+        'external_auth.backends.CASBackend',
     )
     INSTALLED_APPS += ('django_cas',)
     MIDDLEWARE_CLASSES += ('django_cas.middleware.CASMiddleware',)
@@ -424,3 +425,4 @@ EDEVATE_MYSQL_PASSWD = 'edevate12'
 EDEVATE_MYSQL_DB_NAME = 'edevate_devel'
 
 EDEVATE_BASE_URL = 'http://ec2-23-22-165-116.compute-1.amazonaws.com/'
+EDEVATE_AFTER_LOGOUT_URL = '{}university/'.format(EDEVATE_BASE_URL)
