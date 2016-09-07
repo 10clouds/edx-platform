@@ -127,6 +127,7 @@ from eventtracking import tracker
 from notification_prefs.views import enable_notifications
 
 # Note that this lives in openedx, so this dependency should be refactored.
+from openedx.core.djangoapps.content.course_overviews.connector import EdevateDbConnector
 from openedx.core.djangoapps.credentials.utils import get_user_program_credentials
 from openedx.core.djangoapps.credit.email_utils import get_credit_provider_display_names, make_providers_strings
 from openedx.core.djangoapps.user_api.preferences import api as preferences_api
@@ -985,6 +986,13 @@ def _credit_statuses(user, course_enrollments):
     return statuses
 
 
+def edevate_update_user_course_list(user, course_id):
+    edevate_db = EdevateDbConnector()
+    edevate_db.update_users_course_list(course_id, user.email)
+    edevate_db.close()
+    return None
+
+
 @transaction.non_atomic_requests
 @require_POST
 @outer_atomic(read_committed=True)
@@ -1071,6 +1079,7 @@ def change_enrollment(request, check_access=True):
 
         if user.subscriber.is_active_subscription:
             CourseEnrollment.enroll(user, course_id, check_access=False, mode='honor')
+            edevate_update_user_course_list(user, course_id)
             return HttpResponse()
 
         # Check that auto enrollment is allowed for this course
@@ -1086,6 +1095,7 @@ def change_enrollment(request, check_access=True):
                 enroll_mode = CourseMode.auto_enroll_mode(course_id, available_modes)
                 if enroll_mode:
                     CourseEnrollment.enroll(user, course_id, check_access=check_access, mode=enroll_mode)
+                    edevate_update_user_course_list(user, course_id)
             except Exception:  # pylint: disable=broad-except
                 return HttpResponseBadRequest(_("Could not enroll"))
 
@@ -1149,49 +1159,6 @@ def update_subscription(request):
             return HttpResponseBadRequest(_("Could not update subscription data"))
 
     return HttpResponse()
-
-
-def get_openedx_encrypted_access_token(access_token):
-    if not access_token:
-        return None
-
-    salt = base64.urlsafe_b64encode(datetime.datetime.now(UTC).strftime("%d-%m-%Y_%H"))
-    t_sha = hashlib.sha512()
-    t_sha.update(access_token+salt)
-    hashed_token = base64.urlsafe_b64encode(t_sha.digest())
-    return hashed_token
-
-
-@csrf_exempt
-@require_POST
-def edevate_login(request):
-    """
-    Authenticate the client using an OAuth access token.
-    """
-    from rest_framework_oauth.compat import oauth2_provider
-
-    encrypted_access_token = request.POST.get('access_token')
-    action = request.POST.get('action')
-    next_page = request.POST.get('next_page', reverse('dashboard'))
-
-    if encrypted_access_token:
-        tokens = oauth2_provider.oauth2.models.AccessToken.objects.select_related('user')
-        for token in tokens:
-            if encrypted_access_token == get_openedx_encrypted_access_token(token.token):
-                user = token.user
-                user.backend = 'ratelimitbackend.backends.RateLimitModelBackend'
-                if user and isinstance(user, User):
-                    login(request, user)
-                    request.session.set_expiry(604800)
-                    if action == "courses":
-                        next_page = reverse('courses')
-                    if action == "tutorial":
-                        next_page = settings.OPENEDX_TUTORIAL_URL
-                    if action == "studio":
-                        next_page = settings.CMS_BASE_URL
-                    return redirect(next_page)
-    log.info("Access Token does not exist")
-    return redirect(settings.EDEVATE_BASE_URL)
 
 
 # Need different levels of logging
