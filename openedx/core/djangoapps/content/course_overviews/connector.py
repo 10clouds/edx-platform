@@ -126,5 +126,3 @@ class EdevateDbConnector:
                                 """.format(course_ptr_id, edevate_user)
                                 )
             self.connection.commit()
-            return True
-        return False

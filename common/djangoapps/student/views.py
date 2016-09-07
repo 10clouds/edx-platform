@@ -990,7 +990,6 @@ def edevate_update_user_course_list(user, course_id):
     edevate_db = EdevateDbConnector()
     edevate_db.update_users_course_list(course_id, user.email)
     edevate_db.close()
-    return None
 
 
 @transaction.non_atomic_requests
