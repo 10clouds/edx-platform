@@ -28,7 +28,6 @@ urlpatterns = (
     url(r'^update_subscription$', 'student.views.update_subscription', name="update_subscription"),
     url(r'^login_ajax$', 'student.views.login_user', name="login"),
     url(r'^login_ajax/(?P<error>[^/]*)$', 'student.views.login_user'),
-    url(r'^edevate/login/$', 'student.views.edevate_login', name='edevate_login'),
     url(r'^subscription/$', 'student.views.subscription_page', name='subscription_page'),
 
     url(r'^email_confirm/(?P<key>[^/]*)$', 'student.views.confirm_email_change'),

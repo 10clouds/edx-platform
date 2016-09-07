@@ -38,6 +38,7 @@ def _create_edevate_course_for_verification(sender, course_key, **kwargs):  # py
     Catches the signal that a course has been published in Studio and
     create course on the edevate for verification.
     """
+    from cms.djangoapps.contentstore.courseware_index import CourseAboutSearchIndexer
     try:
         course = modulestore().get_course(course_key)
         course_author = User.objects.get(pk=course.published_by)
@@ -45,5 +46,6 @@ def _create_edevate_course_for_verification(sender, course_key, **kwargs):  # py
         edevate_db.update_or_create_verification_course(course_key,
                                                         course_author.email)
         edevate_db.close()
+        CourseAboutSearchIndexer.remove_deleted_items(course_key)
     except User.DoesNotExist:
         pass
