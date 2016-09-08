@@ -349,7 +349,7 @@ def edevate_reindex_course(request, course_key_string):
         except SearchIndexingError as search_err:
             return HttpResponse(dump_js_escaped_json({
                 "user_message": search_err.error_list
-            }), content_type=content_type, status=500)
+            }), content_type=content_type, status=400)
         return HttpResponse(dump_js_escaped_json({
             "user_message": _("Course has been successfully reindexed.")
         }), content_type=content_type, status=200)
