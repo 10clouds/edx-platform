@@ -334,6 +334,27 @@ def course_search_index_handler(request, course_key_string):
         }), content_type=content_type, status=200)
 
 
+@require_GET
+def edevate_reindex_course(request, course_key_string):
+    """
+    The restful handler for course indexing.
+    GET
+        json: return status of indexing task
+    """
+    course_key = CourseKey.from_string(course_key_string)
+    content_type = "application/json; charset=utf-8"
+    with modulestore().bulk_operations(course_key):
+        try:
+            CoursewareSearchIndexer.do_course_reindex(modulestore(), course_key)
+        except SearchIndexingError as search_err:
+            return HttpResponse(dump_js_escaped_json({
+                "user_message": search_err.error_list
+            }), content_type=content_type, status=400)
+        return HttpResponse(dump_js_escaped_json({
+            "user_message": _("Course has been successfully reindexed.")
+        }), content_type=content_type, status=200)
+
+
 def _course_outline_json(request, course_module):
     """
     Returns a JSON representation of the course module and recursively all of its children.
