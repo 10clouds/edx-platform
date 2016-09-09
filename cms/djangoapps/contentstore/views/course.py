@@ -106,7 +106,7 @@ log = logging.getLogger(__name__)
 
 __all__ = ['course_info_handler', 'course_handler', 'course_listing',
            'course_info_update_handler', 'course_search_index_handler',
-           'course_rerun_handler',
+           'course_rerun_handler', 'edevate_reindex_course',
            'settings_handler',
            'grading_handler',
            'advanced_settings_handler',
