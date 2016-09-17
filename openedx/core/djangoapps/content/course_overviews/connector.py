@@ -98,8 +98,7 @@ class EdevateDbConnector:
         self.cursor.execute("""SELECT id
                                FROM courses_course
                                WHERE url LIKE '%{}%';
-                               """.format(openedx_course_id)
-                            )
+                            """.format(openedx_course_id))
         course_ptr_id = self.cursor.fetchone()
         logger.debug("Get edevate course_ptr_id: {!r}".format(course_ptr_id))
         return course_ptr_id[0]
@@ -109,7 +108,7 @@ class EdevateDbConnector:
                                FROM courses_courseuser
                                WHERE course_ptr_id = '{}'
                                  AND student_id = '{}';
-                               """.format(course_ptr_id))
+                            """.format(course_ptr_id, student_id))
         return self.cursor.fetchone()
 
     def update_users_course_list(self, openedx_course_id, user):
