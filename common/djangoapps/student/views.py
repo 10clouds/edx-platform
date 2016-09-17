@@ -127,7 +127,6 @@ from eventtracking import tracker
 from notification_prefs.views import enable_notifications
 
 # Note that this lives in openedx, so this dependency should be refactored.
-from openedx.core.djangoapps.content.course_overviews.connector import EdevateDbConnector
 from openedx.core.djangoapps.credentials.utils import get_user_program_credentials
 from openedx.core.djangoapps.credit.email_utils import get_credit_provider_display_names, make_providers_strings
 from openedx.core.djangoapps.user_api.preferences import api as preferences_api
@@ -986,12 +985,6 @@ def _credit_statuses(user, course_enrollments):
     return statuses
 
 
-def edevate_update_user_course_list(user, course_id):
-    edevate_db = EdevateDbConnector()
-    edevate_db.update_users_course_list(course_id, user.email)
-    edevate_db.close()
-
-
 @transaction.non_atomic_requests
 @require_POST
 @outer_atomic(read_committed=True)
@@ -1078,7 +1071,6 @@ def change_enrollment(request, check_access=True):
 
         if user.subscriber.is_active_subscription:
             CourseEnrollment.enroll(user, course_id, check_access=False, mode='honor')
-            edevate_update_user_course_list(user, course_id)
             return HttpResponse()
 
         # Check that auto enrollment is allowed for this course
@@ -1094,7 +1086,6 @@ def change_enrollment(request, check_access=True):
                 enroll_mode = CourseMode.auto_enroll_mode(course_id, available_modes)
                 if enroll_mode:
                     CourseEnrollment.enroll(user, course_id, check_access=check_access, mode=enroll_mode)
-                    edevate_update_user_course_list(user, course_id)
             except Exception:  # pylint: disable=broad-except
                 return HttpResponseBadRequest(_("Could not enroll"))
 
