@@ -32,7 +32,7 @@ class EdevateDbConnector:
             self.connection.close()
 
     def get_edevate_user_id(self, user_email):
-        self.cursor.execute("""SELECT *
+        self.cursor.execute("""SELECT id
                                FROM users_customuser
                                WHERE email='{}';""".format(user_email)
                             )
@@ -104,25 +104,20 @@ class EdevateDbConnector:
         logger.debug("Get edevate course_ptr_id: {!r}".format(course_ptr_id))
         return course_ptr_id[0]
 
-    def check_user_course(self, course_ptr_id):
+    def course_user_exists(self, course_ptr_id, student_id):
         self.cursor.execute("""SELECT id
                                FROM courses_courseuser
-                               WHERE course_ptr_id = '{}';
-                               """.format(course_ptr_id)
-                            )
-        course = self.cursor.fetchone()
-        if course:
-            return False
-        else:
-            return True
+                               WHERE course_ptr_id = '{}'
+                                 AND student_id = '{}';
+                               """.format(course_ptr_id))
+        return self.cursor.fetchone()
 
     def update_users_course_list(self, openedx_course_id, user):
-        edevate_user = self.get_edevate_user_id(user)
+        student_id = self.get_edevate_user_id(user)
         course_ptr_id = self.get_course(openedx_course_id)
-        if self.check_user_course(course_ptr_id):
+        if not self.course_user_exists(course_ptr_id, student_id):
             self.cursor.execute("""INSERT INTO courses_courseuser
                                    (state, removed, course_ptr_id, student_id)
                                    VALUES ('undergoing', '0', '{}', '{}');
-                                """.format(course_ptr_id, edevate_user)
-                                )
+                                """.format(course_ptr_id, student_id))
             self.connection.commit()
