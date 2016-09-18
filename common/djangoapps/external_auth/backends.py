@@ -133,7 +133,7 @@ class CASBackend(object):
         try:
             user = User.objects.get(email=username)
         except User.DoesNotExist:
-            u_name = username.split('@')[0]
+            u_name = username
             user = User(username=u_name, email=username)
             user.set_unusable_password()
 
