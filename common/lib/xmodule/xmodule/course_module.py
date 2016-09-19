@@ -709,7 +709,12 @@ class CourseFields(object):
         default=None,
         scope=Scope.settings
     )
-
+    subject = String(
+        display_name=_("Course Category"),
+        help=_("Specify the category of your course."),
+        default=None,
+        scope=Scope.settings
+    )
     teams_configuration = Dict(
         display_name=_("Teams Configuration"),
         # Translators: please don't translate "id".

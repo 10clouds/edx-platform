@@ -105,7 +105,16 @@
       </select>
       <span class="tip tip-stacked">Identify the course language here. This is used to assist users find courses that are taught in a specific language.</span>
     </li>
-
+  </ol>
+  <ol class="list-input">
+    <li class="field" id="field-course-subject">
+      <label for="course-subject">Course Subject</label>
+      <select id="course-subject">
+        <option value="" selected> - </option>
+        <option value="common">Common</option>
+      </select>
+      <span class="tip tip-stacked">Identify the course subject here.</span>
+    </li>
   </ol>
 </section>
 

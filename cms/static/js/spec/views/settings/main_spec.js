@@ -44,6 +44,7 @@ define([
                 entrance_exam_minimum_score_pct: '50',
                 license: null,
                 language: '',
+                subject: '',
                 learning_info: [''],
                 instructor_info: {
                     'instructors': [{"name": "","title": "","organization": "","image": "","bio": ""}]
@@ -199,11 +200,25 @@ define([
             );
         });
 
+        it('should save subject as part of course details', function(){
+            var requests = AjaxHelpers.requests(this);
+            var expectedJson = $.extend(true, {}, modelData, {
+                subject: 'common',
+            });
+            $('#course-subject').val('common').trigger('change');
+            expect(this.model.get('subject')).toEqual('common');
+            this.view.saveView();
+            AjaxHelpers.expectJsonRequest(
+                requests, 'POST', urlRoot, expectedJson
+            );
+        });
+
         it('should not error if about_page_editable is False', function(){
             var requests = AjaxHelpers.requests(this);
             // if about_page_editable is false, there is no section.course_details
             $('.course_details').remove();
             expect(this.model.get('language')).toEqual('');
+            expect(this.model.get('subject')).toEqual('');
             this.view.saveView();
             AjaxHelpers.expectJsonRequest(requests, 'POST', urlRoot, modelData);
         });

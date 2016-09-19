@@ -1,0 +1,78 @@
+<%page expression_filter="h"/>
+<%!
+import json
+from django.utils.translation import ugettext as _
+
+from openedx.core.djangolib.markup import Text, HTML
+%>
+<%namespace name='static' file='../../static_content.html'/>
+
+<%inherit file="../../main.html" />
+<%block name="bodyclass">register verification-process step-requirements</%block>
+
+<%block name="pagetitle">${_("Subscription page")}</%block>
+
+<%block name="header_extras">
+    <%
+      template_names = (
+          ["make_payment_step", "error"]
+      )
+    %>
+    % for template_name in template_names:
+        <script type="text/template" id="${template_name}-tpl">
+            <%static:include path="verify_student/subscription/${template_name}.underscore" />
+        </script>
+    % endfor
+</%block>
+<%block name="js_extra">
+  <script src="${static.url('js/src/tooltip_manager.js')}"></script>
+  <%static:js group='subscription'/>
+</%block>
+
+<%block name="content">
+## Top-level wrapper for errors
+## JavaScript views may append to this wrapper
+<div id="error-container" style="display: none;"></div>
+
+<div class="container">
+  <section class="wrapper carousel">
+    ## Payment flow
+    ## Most of these data attributes are used to dynamically render
+    ## the subscription step.
+    <div
+      id="subscription-container"
+      class="pay-and-verify"
+      data-full-name='${user_full_name}'
+      data-platform-name='${platform_name}'
+      data-course-key='${course_key}'
+      data-course-name='${course.display_name}'
+      data-course-mode-name='${course_mode.name}'
+      data-course-mode-slug='${course_mode.slug}'
+      data-course-mode-min-price='${course_mode.min_price}'
+      data-course-mode-sku='${course_mode.sku or ''}'
+      data-course-mode-currency='${course_mode.currency}'
+      data-processors='${json.dumps(processors)}'
+      data-is-active='${is_active}'
+    ></div>
+
+    % if is_active:
+    ## Support
+    <div class="wrapper-content-supplementary">
+      <aside class="content-supplementary">
+          <ul class="list-help">
+              <li class="help-item help-item-questions">
+                  <h3 class="title">${_("Have questions?")}</h3>
+                  <div class="copy">
+                      <p>${Text(_("Please read {a_start}our FAQs to view common questions about subscription{a_end}.")).format(
+                              a_start=HTML('<a rel="external" href="{}">').format(marketing_link('WHAT_IS_SUBSCRIPTION')),
+                              a_end=HTML('</a>'))}</p>
+                  </div>
+              </li>
+          </ul>
+        </aside>
+    </div>
+    % endif
+
+  </section>
+</div>
+</%block>

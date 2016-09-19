@@ -117,6 +117,12 @@ urlpatterns = patterns(
         views.InCourseReverifyView.as_view(),
         name="verify_student_incourse_reverify"
     ),
+    # Endpoint for subscription
+    url(
+        r'^subscribe/$',
+        views.SubscriptionView.as_view(),
+        name="subscribe_student"
+    ),
 )
 
 # Fake response page for incourse reverification ( software secure )

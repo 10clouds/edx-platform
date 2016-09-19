@@ -1,7 +1,9 @@
 """
 Student Views
 """
+import base64
 import datetime
+import hashlib
 import logging
 import uuid
 import json
@@ -37,6 +39,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.template.response import TemplateResponse
 
+from rest_framework_oauth.compat import oauth2_provider
 from ratelimitbackend.exceptions import RateLimitException
 
 from social.apps.django_app import utils as social_utils
@@ -50,11 +53,12 @@ from shoppingcart.api import order_history
 from student.models import (
     Registration, UserProfile,
     PendingEmailChange, CourseEnrollment, CourseEnrollmentAttribute, unique_id_for_user,
-    CourseEnrollmentAllowed, UserStanding, LoginFailures,
+    CourseEnrollmentAllowed, UserStanding, LoginFailures, Subscriber,
     create_comments_service_user, PasswordHistory, UserSignupSource,
     DashboardConfiguration, LinkedInAddToProfileConfiguration, ManualEnrollmentAudit, ALLOWEDTOENROLL_TO_ENROLLED)
 from student.forms import AccountCreationForm, PasswordResetFormNoActive, get_registration_extension_form
 from lms.djangoapps.commerce.utils import EcommerceService  # pylint: disable=import-error
+from lms.djangoapps.commerce.constants import OrderStatus  # pylint: disable=import-error
 from lms.djangoapps.verify_student.models import SoftwareSecurePhotoVerification  # pylint: disable=import-error
 from certificates.models import CertificateStatuses, certificate_status_for_student
 from certificates.api import (  # pylint: disable=import-error
@@ -283,6 +287,10 @@ def get_course_enrollments(user, org_to_include, orgs_to_exclude):
                 user.username,
                 enrollment.course_id
             )
+            continue
+
+        # Skip subscription course
+        if unicode(course_overview.id) == unicode(settings.SUBSCRIPTION_COURSE_KEY):
             continue
 
         # If we are in a Microsite, then filter out anything that is not
@@ -741,7 +749,7 @@ def dashboard(request):
         'course_programs': course_programs,
         'disable_courseware_js': True,
         'xseries_credentials': xseries_credentials,
-        'show_program_listing': ProgramsApiConfig.current().show_program_listing,
+        'show_program_listing': ProgramsApiConfig.current().show_program_listing
     }
 
     ecommerce_service = EcommerceService()
@@ -752,6 +760,16 @@ def dashboard(request):
         })
 
     return render_to_response('dashboard.html', context)
+
+
+def subscription_page(request):
+    subscription_course_key = CourseKey.from_string(unicode(settings.SUBSCRIPTION_COURSE_KEY))
+    context = {
+        'is_active_subscription': request.user.subscriber.is_active_subscription,
+        'subscription_course_key': settings.SUBSCRIPTION_COURSE_KEY,
+        'is_subscription_course_enrolled': CourseEnrollment.is_enrolled(request.user, subscription_course_key)
+    }
+    return render_to_response('subscription.html', context)
 
 
 def _create_recent_enrollment_message(course_enrollments, course_modes):  # pylint: disable=invalid-name
@@ -1051,6 +1069,10 @@ def change_enrollment(request, check_access=True):
         if redirect_url:
             return HttpResponse(redirect_url)
 
+        if user.subscriber.is_active_subscription:
+            CourseEnrollment.enroll(user, course_id, check_access=False, mode='honor')
+            return HttpResponse()
+
         # Check that auto enrollment is allowed for this course
         # (= the course is NOT behind a paywall)
         if CourseMode.can_auto_enroll(course_id):
@@ -1091,6 +1113,42 @@ def change_enrollment(request, check_access=True):
         return HttpResponse()
     else:
         return HttpResponseBadRequest(_("Enrollment action is invalid"))
+
+
+@transaction.non_atomic_requests
+@require_POST
+@outer_atomic(read_committed=True)
+def update_subscription(request):
+    """
+    Modify the subscription_until date.
+
+    Args:
+        request (`Request`): The Django request object
+
+    Returns:
+        Response
+
+    """
+    # Get the user
+    user = request.user
+
+    # Ensure the user is authenticated
+    if not user.is_authenticated():
+        return HttpResponseForbidden()
+
+    order_date = request.POST.get("order_date")
+    order_status = request.POST.get("order_status")
+    if order_status == OrderStatus.COMPLETE:
+        order_datetime = datetime.datetime.strptime(order_date, "%Y-%m-%dT%H:%M:%SZ")
+        subscription_until = order_datetime.replace(tzinfo=UTC) + datetime.timedelta(days=settings.SUBSCRIPTOIN_DAYS)
+        try:
+            user.subscriber.subscription_until = subscription_until
+            user.subscriber.save()
+        except Exception as e:
+            log.error(u"{!r}".format(e))
+            return HttpResponseBadRequest(_("Could not update subscription data"))
+
+    return HttpResponse()
 
 
 # Need different levels of logging
@@ -1370,7 +1428,7 @@ def logout_user(request):
     if settings.FEATURES.get('AUTH_USE_CAS'):
         target = reverse('cas-logout')
     else:
-        target = '/'
+        target = settings.EDEVATE_AFTER_LOGOUT_URL
     response = redirect(target)
 
     delete_logged_in_cookies(response)
@@ -1561,7 +1619,11 @@ def _do_create_account(form, custom_form=None):
     except Exception:  # pylint: disable=broad-except
         log.exception("UserProfile creation failed for user {id}.".format(id=user.id))
         raise
-
+    try:
+        Subscriber.objects.create(user=user)
+    except Exception:  # pylint: disable=broad-except
+        log.exception("Subscriber creation failed for user {id}".format(id=user.id))
+        raise
     return (user, profile, registration)
 
 

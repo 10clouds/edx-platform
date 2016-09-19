@@ -5,6 +5,7 @@ import json
 import logging
 from urlparse import urlparse, urlunparse
 
+from django.conf import settings
 from django.db import models, transaction
 from django.db.models.fields import BooleanField, DateTimeField, DecimalField, TextField, FloatField, IntegerField
 from django.db.utils import IntegrityError
@@ -94,6 +95,7 @@ class CourseOverview(TimeStampedModel):
     max_student_enrollments_allowed = IntegerField(null=True)
 
     # Catalog information
+    subject = TextField(max_length=255, null=True)
     catalog_visibility = TextField(null=True)
     short_description = TextField(null=True)
     course_video_url = TextField(null=True)
@@ -178,6 +180,7 @@ class CourseOverview(TimeStampedModel):
             invitation_only=course.invitation_only,
             max_student_enrollments_allowed=max_student_enrollments_allowed,
 
+            subject=course.subject,
             catalog_visibility=course.catalog_visibility,
             short_description=CourseDetails.fetch_about_attribute(course.id, 'short_description'),
             effort=CourseDetails.fetch_about_attribute(course.id, 'effort'),
@@ -484,7 +487,7 @@ class CourseOverview(TimeStampedModel):
         # Note: If a newly created course is not returned in this QueryList,
         # make sure the "publish" signal was emitted when the course was
         # created. For tests using CourseFactory, use emit_signals=True.
-        course_overviews = CourseOverview.objects.all()
+        course_overviews = CourseOverview.objects.all().exclude(id=CourseKey.from_string(settings.SUBSCRIPTION_COURSE_KEY))
 
         if org:
             # In rare cases, courses belonging to the same org may be accidentally assigned

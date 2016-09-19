@@ -23,11 +23,12 @@ if settings.DEBUG or settings.FEATURES.get('ENABLE_DJANGO_ADMIN_SITE'):
 # Use urlpatterns formatted as within the Django docs with first parameter "stuck" to the open parenthesis
 urlpatterns = (
     '',
-
     url(r'^$', 'branding.views.index', name="root"),   # Main marketing page, or redirect to courseware
     url(r'^dashboard$', 'student.views.dashboard', name="dashboard"),
+    url(r'^update_subscription$', 'student.views.update_subscription', name="update_subscription"),
     url(r'^login_ajax$', 'student.views.login_user', name="login"),
     url(r'^login_ajax/(?P<error>[^/]*)$', 'student.views.login_user'),
+    url(r'^subscription/$', 'student.views.subscription_page', name='subscription_page'),
 
     url(r'^email_confirm/(?P<key>[^/]*)$', 'student.views.confirm_email_change'),
     url(r'^event$', 'track.views.user_track'),
@@ -796,7 +797,7 @@ if settings.FEATURES.get('AUTH_USE_SHIB'):
 if settings.FEATURES.get('AUTH_USE_CAS'):
     urlpatterns += (
         url(r'^cas-auth/login/$', 'external_auth.views.cas_login', name="cas-login"),
-        url(r'^cas-auth/logout/$', 'django_cas.views.logout', {'next_page': '/'}, name="cas-logout"),
+        url(r'^cas-auth/logout/$', 'external_auth.views.cas_logout', {'next_page': settings.EDEVATE_AFTER_LOGOUT_URL}, name="cas-logout"),
     )
 
 if settings.FEATURES.get('RESTRICT_ENROLL_BY_REG_METHOD'):

@@ -41,6 +41,7 @@ from contentstore.push_notification import push_notification_enabled
 from contentstore.tasks import rerun_course
 from contentstore.utils import (
     add_instructor,
+    add_sales_finance_admin,
     initialize_permissions,
     get_lms_link_for_item,
     remove_all_instructors,
@@ -105,7 +106,7 @@ log = logging.getLogger(__name__)
 
 __all__ = ['course_info_handler', 'course_handler', 'course_listing',
            'course_info_update_handler', 'course_search_index_handler',
-           'course_rerun_handler',
+           'course_rerun_handler', 'edevate_reindex_course',
            'settings_handler',
            'grading_handler',
            'advanced_settings_handler',
@@ -328,6 +329,27 @@ def course_search_index_handler(request, course_key_string):
             return HttpResponse(dump_js_escaped_json({
                 "user_message": search_err.error_list
             }), content_type=content_type, status=500)
+        return HttpResponse(dump_js_escaped_json({
+            "user_message": _("Course has been successfully reindexed.")
+        }), content_type=content_type, status=200)
+
+
+@require_GET
+def edevate_reindex_course(request, course_key_string):
+    """
+    The restful handler for course indexing.
+    GET
+        json: return status of indexing task
+    """
+    course_key = CourseKey.from_string(course_key_string)
+    content_type = "application/json; charset=utf-8"
+    with modulestore().bulk_operations(course_key):
+        try:
+            CoursewareSearchIndexer.do_course_reindex(modulestore(), course_key)
+        except SearchIndexingError as search_err:
+            return HttpResponse(dump_js_escaped_json({
+                "user_message": search_err.error_list
+            }), content_type=content_type, status=400)
         return HttpResponse(dump_js_escaped_json({
             "user_message": _("Course has been successfully reindexed.")
         }), content_type=content_type, status=200)
@@ -805,6 +827,7 @@ def create_new_course_in_store(store, user, org, number, run, fields):
     # Set default language from settings and enable web certs
     fields.update({
         'language': getattr(settings, 'DEFAULT_COURSE_LANGUAGE', 'en'),
+        'subject': getattr(settings, 'DEFAULT_COURSE_SUBJECT', 'common'),
         'cert_html_view_enabled': True,
     })
 
@@ -820,7 +843,7 @@ def create_new_course_in_store(store, user, org, number, run, fields):
 
     # Make sure user has instructor and staff access to the new course
     add_instructor(new_course.id, user, user)
-
+    add_sales_finance_admin(new_course.id, user, user)
     # Initialize permissions for user in the new course
     initialize_permissions(new_course.id, user)
     return new_course
@@ -849,7 +872,7 @@ def _rerun_course(request, org, number, run, fields):
     # Make sure user has instructor and staff access to the destination course
     # so the user can see the updated status for that course
     add_instructor(destination_course_key, request.user, request.user)
-
+    add_sales_finance_admin(destination_course_key, request.user, request.user)
     # Mark the action as initiated
     CourseRerunState.objects.initiated(source_course_key, destination_course_key, request.user, fields['display_name'])
 
@@ -1004,6 +1027,7 @@ def settings_handler(request, course_key_string):
                 'upload_asset_url': upload_asset_url,
                 'course_handler_url': reverse_course_url('course_handler', course_key),
                 'language_options': settings.ALL_LANGUAGES,
+                'subject_options': settings.ALL_SUBJECTS,
                 'credit_eligibility_enabled': credit_eligibility_enabled,
                 'is_credit_course': False,
                 'show_min_grade_warning': False,

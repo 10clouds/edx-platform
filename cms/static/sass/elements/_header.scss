@@ -1,5 +1,109 @@
 // studio - elements - global header
 // ====================
+$main-color: #0ca8e3;
+$light-color: #ffffff;
+
+.header-global {
+    height: 103px;
+    background-color: $main-color;
+
+    .wrapper-edevate-header {
+        max-width: 1180px;
+        padding: 35px 0;
+        margin: 0 auto;
+        line-height: 18px;
+    }
+
+    .logo {
+        margin: -14px 0 0 5px;
+        position: absolute;
+
+        a {
+            background: url('../images/edevate_logo.svg') no-repeat;
+            display: block;
+            outline: none;
+            height: 50px;
+            width: 138px;
+        }
+    }
+
+    .nav-global {
+        display: block;
+        text-align: center;
+        float: none;
+
+        li {
+          font-size: 18px;
+          font-weight: 400;
+          text-transform: none;
+          letter-spacing: 0;
+
+          padding: 5px 10px;
+          float: none;
+          display: inline-block;
+
+
+          a {
+            display: inline;
+            padding: 0 5px;
+            font-weight: 400;
+            color: $light-color;
+            margin: 0 20px;
+            border-bottom: 2px solid $main-color;
+            font-family: "titilium";
+
+            &:hover, &:focus, &:active {
+              text-decoration: none;
+              border-bottom: 2px solid $light-color;
+              color: $light-color;
+            }
+          }
+        }
+    }
+
+
+  .nav-account {
+      position: absolute;
+      right: 101px;
+      top: 36px !important;
+
+      .nav-sub {
+          @include text-align(left);
+          z-index: 9999 !important;
+      }
+
+      .nav-account-help {
+          .wrapper-nav-sub {
+              width: ($baseline*10);
+          }
+      }
+
+    .nav-account-user {
+        background: $main-color !important;
+        border: 1px solid $light-color !important;
+        color: $light-color;
+        border-radius: 4px !important;
+        font-family: "titilium";
+        line-height: 1.6rem;
+        outline: none;
+        font-size: 14px !important;
+        font-weight: bold;
+
+        .title {
+          padding: 8px 12px;
+
+          > .label {
+            display: inline-block;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+          }
+        }
+    }
+  }
+}
+
+// ====================
 
 .wrapper-header {
   @extend %ui-depth3;

@@ -319,7 +319,7 @@ FEATURES = {
     'LICENSING': False,
 
     # Certificates Web/HTML Views
-    'CERTIFICATES_HTML_VIEW': False,
+    'CERTIFICATES_HTML_VIEW': True,
 
     # Batch-Generated Certificates from Instructor Dashboard
     'CERTIFICATES_INSTRUCTOR_GENERATION': False,
@@ -575,6 +575,13 @@ COURSE_SETTINGS = {
     }
 }
 
+# Subscription course key
+SUBSCRIPTION_COURSE_KEY = 'course-v1:Edevate+SUBSCRIPTION+COURSE'
+SUBSCRIPTOIN_DAYS = 30
+
+OPENEDX_TUTORIAL_URL = 'http://50.97.47.83:18000/courses/course-v1:edX+DemoX+Demo_Course/about'
+CMS_BASE_URL = 'http://50.97.47.83:18010'
+
 # IP addresses that are allowed to reload the course, etc.
 # TODO (vshnayder): Will probably need to change as we get real access control in.
 LMS_MIGRATION_ALLOWED_IPS = []
@@ -799,7 +806,7 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 DEFAULT_FROM_EMAIL = 'registration@example.com'
 DEFAULT_FEEDBACK_EMAIL = 'feedback@example.com'
 SERVER_EMAIL = 'devops@example.com'
-TECH_SUPPORT_EMAIL = 'technical@example.com'
+TECH_SUPPORT_EMAIL = 'admin@edevate.com'
 CONTACT_EMAIL = 'info@example.com'
 BUGS_EMAIL = 'bugs@example.com'
 UNIVERSITY_EMAIL = 'university@example.com'
@@ -933,6 +940,18 @@ LANGUAGE_DICT = dict(LANGUAGES)
 
 USE_I18N = True
 USE_L10N = True
+
+ALL_SUBJECTS = (
+    ('architecture', u'Architecture'),
+    ('art_culture', u'Art & Culture'),
+    ('biology_life_sciences', u'Biology & Life Sciences'),
+    ('business_management', u'Business & Management'),
+    ('chemistry', u'Chemistry'),
+    ('common', u'Common'),
+    ('communication', u'Communication'),
+    ('computer_science', u'Computer Science'),
+    ('data_analysis_statistics', u'Data Analysis & Statistics'),
+)
 
 STATICI18N_ROOT = PROJECT_ROOT / "static"
 STATICI18N_OUTPUT_DIR = "js/i18n"
@@ -1312,6 +1331,12 @@ instructor_dash_js = (
     sorted(rooted_glob(PROJECT_ROOT / 'static', 'js/instructor_dashboard/**/*.js'))
 )
 
+subscription_js = [
+    'js/subscription/views/error_view.js',
+    'js/subscription/views/pay_view.js',
+    'js/subscription/subscribe.js',
+]
+
 verify_student_js = [
     'js/sticky_filter.js',
     'js/query-params.js',
@@ -1573,6 +1598,10 @@ PIPELINE_JS = {
     'dashboard': {
         'source_filenames': dashboard_js,
         'output_filename': 'js/dashboard.js'
+    },
+    'subscription': {
+        'source_filenames': subscription_js,
+        'output_filename': 'js/subscription.js'
     },
     'verify_student': {
         'source_filenames': verify_student_js,
@@ -2097,6 +2126,8 @@ MKTG_URL_LINK_MAP = {
 
     # Verified Certificates
     'WHAT_IS_VERIFIED_CERT': 'verified-certificate',
+    # Subscription
+    'WHAT_IS_SUBSCRIPTION': 'subscription-faq'
 }
 
 STATIC_TEMPLATE_VIEW_DEFAULT_FILE_EXTENSION = 'html'
@@ -2897,3 +2928,9 @@ API_ACCESS_MANAGER_EMAIL = 'api-access@example.com'
 API_ACCESS_FROM_EMAIL = 'api-requests@example.com'
 API_DOCUMENTATION_URL = 'http://edx.readthedocs.org/projects/edx-platform-api/en/latest/overview.html'
 AUTH_DOCUMENTATION_URL = 'http://edx.readthedocs.org/projects/edx-platform-api/en/latest/authentication.html'
+
+EDEVATE_BASE_URL = 'http://ec2-23-22-165-116.compute-1.amazonaws.com/'
+EDEVATE_AFTER_LOGOUT_URL = '{}university/'.format(EDEVATE_BASE_URL)
+ADMIN_VERIFICATION_EMAILS = ['vladimir.sokolovskiy@10clouds.com',
+                             'sergey.kospanov@10clouds.com',
+                             'adam.dziuba@10clouds.com']

@@ -79,3 +79,12 @@
     font-weight: 700;
     font-style: italic;
 }
+
+@font-face {
+    font-family: 'titilium';
+    src: url('#{$static-path}/fonts/titilium/TitilliumRegular.eot');
+    src: url('#{$static-path}/fonts/titilium/TitilliumRegular.eot') format('embedded-opentype'),
+         url('#{$static-path}/fonts/titilium/TitilliumRegular.woff2') format('woff2'),
+         url('#{$static-path}/fonts/titilium/TitilliumRegular.woff') format('woff'),
+         url('#{$static-path}/fonts/titilium/TitilliumRegular.ttf') format('truetype');
+}

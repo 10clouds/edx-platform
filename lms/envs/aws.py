@@ -317,11 +317,12 @@ SSL_AUTH_DN_FORMAT_STRING = ENV_TOKENS.get("SSL_AUTH_DN_FORMAT_STRING",
 
 # Django CAS external authentication settings
 CAS_EXTRA_LOGIN_PARAMS = ENV_TOKENS.get("CAS_EXTRA_LOGIN_PARAMS", None)
+CAS_LOGOUT_COMPLETELY = ENV_TOKENS.get("CAS_LOGOUT_COMPLETELY", True)
 if FEATURES.get('AUTH_USE_CAS'):
     CAS_SERVER_URL = ENV_TOKENS.get("CAS_SERVER_URL", None)
     AUTHENTICATION_BACKENDS = (
         'django.contrib.auth.backends.ModelBackend',
-        'django_cas.backends.CASBackend',
+        'external_auth.backends.CASBackend',
     )
     INSTALLED_APPS += ('django_cas',)
     MIDDLEWARE_CLASSES += ('django_cas.middleware.CASMiddleware',)
@@ -812,3 +813,13 @@ API_ACCESS_FROM_EMAIL = ENV_TOKENS.get('API_ACCESS_FROM_EMAIL')
 
 # Mobile App Version Upgrade config
 APP_UPGRADE_CACHE_TIMEOUT = ENV_TOKENS.get('APP_UPGRADE_CACHE_TIMEOUT', APP_UPGRADE_CACHE_TIMEOUT)
+
+# Edevate db settings
+EDEVATE_MYSQL_HOST = 'edevate-devel.c60tpezs6h1t.us-east-1.rds.amazonaws.com'
+EDEVATE_MYSQL_PORT = 3306
+EDEVATE_MYSQL_USER = 'edevate_devel'
+EDEVATE_MYSQL_PASSWD = 'edevate12'
+EDEVATE_MYSQL_DB_NAME = 'edevate_devel'
+
+EDEVATE_BASE_URL = 'http://ec2-23-22-165-116.compute-1.amazonaws.com/'
+EDEVATE_AFTER_LOGOUT_URL = '{}university/'.format(EDEVATE_BASE_URL)

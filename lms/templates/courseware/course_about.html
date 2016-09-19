@@ -131,7 +131,11 @@ from openedx.core.lib.courses import course_image_url
             <strong>${_("View Course")}</strong>
             </a>
           %endif
-
+        %elif user.is_authenticated() and user.subscriber.is_active_subscription:
+          <a href="#" class="register">
+            ${_("Enroll in {course_name}").format(course_name=course.display_number_with_default) | h}
+          </a>
+          <div id="register_error"></div>
         %elif in_cart:
           <span class="add-to-cart">
             ${_('This course is in your <a href="{cart_link}">cart</a>.').format(cart_link=cart_link)}

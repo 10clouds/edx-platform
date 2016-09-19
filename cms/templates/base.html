@@ -78,9 +78,7 @@ from openedx.core.djangolib.js_utils import (
           </div>
       </main>
 
-      % if user.is_authenticated():
-        <%include file="widgets/sock.html" args="online_help_token=online_help_token" />
-      % endif
+
       <%include file="widgets/footer.html" />
 
       <div id="page-notification"></div>

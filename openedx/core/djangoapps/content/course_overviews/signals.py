@@ -1,10 +1,14 @@
 """
 Signal handler for invalidating cached course overviews
 """
+from django.conf import settings
+from django.contrib.auth.models import User
 from django.dispatch.dispatcher import receiver
 
 from .models import CourseOverview
-from xmodule.modulestore.django import SignalHandler
+from .connector import EdevateDbConnector
+from xmodule.modulestore.django import SignalHandler, modulestore
+from edxmako.shortcuts import render_to_string
 
 
 @receiver(SignalHandler.course_published)
@@ -28,3 +32,37 @@ def _listen_for_course_delete(sender, course_key, **kwargs):  # pylint: disable=
     from cms.djangoapps.contentstore.courseware_index import CourseAboutSearchIndexer
     # Delete course entry from Course About Search_index
     CourseAboutSearchIndexer.remove_deleted_items(course_key)
+
+
+@receiver(SignalHandler.course_published)
+def _create_edevate_course_for_verification(sender, course_key, **kwargs):  # pylint: disable=unused-argument
+    """
+    Catches the signal that a course has been published in Studio and
+    create course on the edevate for verification.
+    """
+    from cms.djangoapps.contentstore.courseware_index import CourseAboutSearchIndexer
+    from student.models import get_user
+
+    try:
+        course = modulestore().get_course(course_key)
+        course_author = User.objects.get(pk=course.published_by)
+        edevate_db = EdevateDbConnector()
+        edevate_db.update_or_create_verification_course(course_key,
+                                                        course_author.email)
+        edevate_db.close()
+        CourseAboutSearchIndexer.remove_deleted_items(course_key)
+
+        admin_emails_list = settings.ADMIN_VERIFICATION_EMAILS
+        for admin_email in admin_emails_list:
+            user, user_profile = get_user(admin_email)
+            if user:
+                context = {
+                    'course_key': course_key
+                }
+                subject = "Openedx course verification"
+                message = render_to_string('emails/edevate_course_verification_email.txt',
+                                           context)
+                from_address = settings.DEFAULT_FROM_EMAIL
+                user.email_user(subject, message, from_address)
+    except User.DoesNotExist:
+        pass

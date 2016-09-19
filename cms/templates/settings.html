@@ -282,6 +282,18 @@ CMS.URL.UPLOAD_ASSET = '${upload_asset_url}'
               <span class="tip tip-stacked">${_("Identify the course language here. This is used to assist users find courses that are taught in a specific language.")}</span>
             </li>
           </ol>
+          <ol class="list-input">
+            <li class="field" id="field-course-subject">
+              <label for="course-subject">${_("Course Subject")}</label>
+              <select id="course-subject">
+                <option value="" selected> - </option>
+                % for subject_value, subject_label in subject_options:
+                  <option value="${subject_value}">${subject_label}</option>
+                % endfor
+              </select>
+              <span class="tip tip-stacked">${_("Identify the course subject here.")}</span>
+            </li>
+          </ol>
         </section>
         % endif
 

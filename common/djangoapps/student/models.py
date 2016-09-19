@@ -58,6 +58,8 @@ from util.model_utils import emit_field_changed_events, get_changed_fields_dict
 from util.query import use_read_replica_if_available
 from util.milestones_helpers import is_entrance_exams_enabled
 
+from openedx.core.djangoapps.content.course_overviews.connector import EdevateDbConnector
+
 
 UNENROLL_DONE = Signal(providing_args=["course_enrollment", "skip_refund"])
 log = logging.getLogger(__name__)
@@ -396,6 +398,21 @@ class UserProfile(models.Model):
             Unicode cache key
         """
         return cls.PROFILE_COUNTRY_CACHE_KEY.format(user_id=user_id)
+
+
+class Subscriber(models.Model):
+    user = models.OneToOneField(User, unique=True, db_index=True,
+                                related_name='subscriber')
+    created = models.DateTimeField(auto_now_add=True, null=True)
+    subscription_until = models.DateTimeField(null=True)
+    allowed_courses = models.TextField(blank=True, null=True)
+
+    @property
+    def is_active_subscription(self):
+        if not self.subscription_until:
+            return False
+
+        return datetime.now(UTC) < self.subscription_until
 
 
 @receiver(models.signals.post_save, sender=UserProfile)
@@ -1245,6 +1262,11 @@ class CourseEnrollment(models.Model):
         if badges_enabled():
             from lms.djangoapps.badges.events.course_meta import award_enrollment_badge
             award_enrollment_badge(user)
+
+        # update edevate CourseUser
+        edevate_db = EdevateDbConnector()
+        edevate_db.update_users_course_list(course_key, user.email)
+        edevate_db.close()
 
         return enrollment
 

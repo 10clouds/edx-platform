@@ -134,7 +134,7 @@ class StudentModule(models.Model):
             return queryset
 
     def __repr__(self):
-        return 'StudentModule<%r>' % ({
+        return u'StudentModule<%r>' % ({
             'course_id': self.course_id,
             'module_type': self.module_type,
             # We use the student_id instead of username to avoid a database hop.
