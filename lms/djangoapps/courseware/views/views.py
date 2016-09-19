@@ -516,6 +516,7 @@ def course_about(request, course_id):
              CourseMode.NO_ID_PROFESSIONAL_MODE in modes)):
             professional_mode = (
                 modes.get(CourseMode.HONOR, '') or
+                modes.get(CourseMode.PROFESSIONAL, '') or
                 modes.get(CourseMode.NO_ID_PROFESSIONAL_MODE, '')
             )
             ecommerce_checkout_link = ecomm_service.checkout_page_url(professional_mode.sku)
