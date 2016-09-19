@@ -510,10 +510,9 @@ def course_about(request, course_id):
         ecommerce_bulk_checkout_link = ''
         professional_mode = None
         ecomm_service = EcommerceService()
-        if ecomm_service.is_enabled(request.user) and (
-                CourseMode.PROFESSIONAL in modes or CourseMode.NO_ID_PROFESSIONAL_MODE in modes
-        ):
-            professional_mode = modes.get(CourseMode.PROFESSIONAL, '') or \
+        if ecomm_service.is_enabled(request.user) and (CourseMode.HONOR in modes
+            or CourseMode.NO_ID_PROFESSIONAL_MODE in modes):
+            professional_mode = modes.get(CourseMode.HONOR, '') or \
                 modes.get(CourseMode.NO_ID_PROFESSIONAL_MODE, '')
             ecommerce_checkout_link = ecomm_service.checkout_page_url(professional_mode.sku)
             if professional_mode.bulk_sku:
