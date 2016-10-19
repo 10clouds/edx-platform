@@ -367,6 +367,7 @@
     .recipient-details {
         @extend %copy-base;
         font-weight: font-weight(semi-bold);
+        width: 100%;
     }
 
     .recipient-name {
