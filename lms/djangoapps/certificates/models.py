@@ -837,10 +837,15 @@ class CertificateGenerationCourseSetting(TimeStampedModel):
             is_enabled (boolean): Whether to enable or disable self-generated certificates.
 
         """
-        CertificateGenerationCourseSetting.objects.create(
-            course_key=course_key,
-            enabled=is_enabled
-        )
+        try:
+            latest = cls.objects.get(course_key=course_key)
+            latest.enabled = is_enabled
+            latest.save()
+        except cls.DoesNotExist:
+            CertificateGenerationCourseSetting.objects.create(
+                course_key=course_key,
+                enabled=is_enabled
+            )
 
 
 class CertificateGenerationConfiguration(ConfigurationModel):
