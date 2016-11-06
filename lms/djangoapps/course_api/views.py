@@ -241,14 +241,14 @@ class CourseDeletionView(DeveloperErrorViewMixin, APIView):
 
     def get(self, request, *args, **kwargs):
 
-        self.kwargs['course_key_string']
+        course_key_string = self.kwargs['course_key_string']
         try:
-            course_key = CourseKey.from_string(self.kwargs['course_key_string'])
+            course_key = CourseKey.from_string(course_key_string)
         except InvalidKeyError:
-            raise ValidationError("Invalid course_key: '{}'.".format(self.kwargs['course_key_string']))
+            raise ValidationError("Invalid course_key: '{}'.".format(course_key_string))
 
         if not modulestore().get_course(course_key):
-            raise ValidationError("Course with '{}' key not found.".format(self.kwargs['course_key_string']))
+            raise ValidationError("Course with '{}' key not found.".format(course_key_string))
 
         delete_course_and_groups(course_key, ModuleStoreEnum.UserID.mgmt_command)
 
