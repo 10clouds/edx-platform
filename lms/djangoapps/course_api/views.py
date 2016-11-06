@@ -3,8 +3,15 @@ Course API Views
 """
 
 from django.core.exceptions import ValidationError
+from rest_framework.response import Response
 from rest_framework.generics import ListAPIView, RetrieveAPIView
+from rest_framework.views import APIView
 
+from cms.djangoapps.contentstore.utils import delete_course_and_groups
+from opaque_keys.edx.keys import CourseKey
+from opaque_keys import InvalidKeyError
+from xmodule.modulestore.django import modulestore
+from xmodule.modulestore import ModuleStoreEnum
 from openedx.core.lib.api.paginators import NamespacedPageNumberPagination
 from openedx.core.lib.api.view_utils import view_auth_classes, DeveloperErrorViewMixin
 from .api import course_detail, list_courses
@@ -206,3 +213,43 @@ class CourseListView(DeveloperErrorViewMixin, ListAPIView):
             org=form.cleaned_data['org'],
             filter_=form.cleaned_data['filter_'],
         )
+
+
+@view_auth_classes(is_authenticated=False)
+class CourseDeletionView(DeveloperErrorViewMixin, APIView):
+    """
+    **Use Cases**
+
+        Request details for a course
+
+    **Example Requests**
+
+        GET /api/courses/v1/courses/delete_course/{course_key}/
+
+    **Parameters:**
+
+        course_key:
+            The course key for deletion.
+
+    **Returns**
+
+        * 200 on success with above fields.
+        * 400 if the course is not available or cannot be seen.
+    """
+
+    serializer_class = CourseDetailSerializer
+
+    def get(self, request, *args, **kwargs):
+
+        self.kwargs['course_key_string']
+        try:
+            course_key = CourseKey.from_string(self.kwargs['course_key_string'])
+        except InvalidKeyError:
+            raise ValidationError("Invalid course_key: '{}'.".format(self.kwargs['course_key_string']))
+
+        if not modulestore().get_course(course_key):
+            raise ValidationError("Course with '{}' key not found.".format(self.kwargs['course_key_string']))
+
+        delete_course_and_groups(course_key, ModuleStoreEnum.UserID.mgmt_command)
+
+        return Response()
