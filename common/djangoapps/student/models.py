@@ -1333,6 +1333,10 @@ class CourseEnrollment(models.Model):
                 user,
                 course_id
             )
+        # delete edevate CourseUser
+        edevate_db = EdevateDbConnector()
+        edevate_db.delete_users_course(course_id, user.email)
+        edevate_db.close()
 
     @classmethod
     def unenroll_by_email(cls, email, course_id):

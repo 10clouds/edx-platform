@@ -124,3 +124,22 @@ class EdevateDbConnector:
                                    VALUES ('undergoing', '0', '{}', '{}');
                                 """.format(course_ptr_id, student_id))
             self.connection.commit()
+        else:
+            self.cursor.execute("""UPDATE courses_courseuser SET removed='0'
+                                   WHERE course_ptr_id='{}' AND student_id='{}';
+                                """.format(course_ptr_id, student_id))
+            self.connection.commit()
+
+    def delete_users_course(self, openedx_course_id, user):
+        student_id = self.get_edevate_user_id(user)
+        course_ptr_id = self.get_course(openedx_course_id)
+
+        # if there is no corresponding course in edevate db - do nothing
+        if not course_ptr_id:
+            return
+
+        if self.course_user_exists(course_ptr_id, student_id):
+            self.cursor.execute("""DELETE FROM courses_courseuser
+                                   WHERE course_ptr_id='{}' AND student_id='{}';
+                                """.format(course_ptr_id, student_id))
+            self.connection.commit()
