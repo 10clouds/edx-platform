@@ -2,7 +2,7 @@
 Course API Views
 """
 
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from rest_framework.response import Response
 from rest_framework.generics import ListAPIView, RetrieveAPIView
 from rest_framework.views import APIView
@@ -220,7 +220,7 @@ class CourseDeletionView(DeveloperErrorViewMixin, APIView):
     """
     **Use Cases**
 
-        Request details for a course
+        Delete a course
 
     **Example Requests**
 
@@ -233,8 +233,9 @@ class CourseDeletionView(DeveloperErrorViewMixin, APIView):
 
     **Returns**
 
-        * 200 on success with above fields.
-        * 400 if the course is not available or cannot be seen.
+        * 204 on deletion success with above fields.
+        * 400 if the course_key is wrong.
+        * 404 if the course does not exist
     """
 
     serializer_class = CourseDetailSerializer
@@ -248,8 +249,8 @@ class CourseDeletionView(DeveloperErrorViewMixin, APIView):
             raise ValidationError("Invalid course_key: '{}'.".format(course_key_string))
 
         if not modulestore().get_course(course_key):
-            raise ValidationError("Course with '{}' key not found.".format(course_key_string))
+            raise ObjectDoesNotExist("Course with '{}' key not found.".format(course_key_string))
 
         delete_course_and_groups(course_key, ModuleStoreEnum.UserID.mgmt_command)
 
-        return Response()
+        return Response(status=204)
