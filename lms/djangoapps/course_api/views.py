@@ -233,9 +233,7 @@ class CourseDeletionView(DeveloperErrorViewMixin, APIView):
 
     **Returns**
 
-        * 204 on deletion success with above fields.
-        * 400 if the course_key is wrong.
-        * 404 if the course does not exist
+        * always returns 204 response
     """
 
     serializer_class = CourseDetailSerializer
@@ -246,11 +244,9 @@ class CourseDeletionView(DeveloperErrorViewMixin, APIView):
         try:
             course_key = CourseKey.from_string(course_key_string)
         except InvalidKeyError:
-            raise ValidationError("Invalid course_key: '{}'.".format(course_key_string))
+            return Response(status=204)
 
-        if not modulestore().get_course(course_key):
-            raise ObjectDoesNotExist("Course with '{}' key not found.".format(course_key_string))
-
-        delete_course_and_groups(course_key, ModuleStoreEnum.UserID.mgmt_command)
+        if modulestore().get_course(course_key):
+            delete_course_and_groups(course_key, ModuleStoreEnum.UserID.mgmt_command)
 
         return Response(status=204)
