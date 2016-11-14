@@ -2929,6 +2929,7 @@ API_ACCESS_FROM_EMAIL = 'api-requests@example.com'
 API_DOCUMENTATION_URL = 'http://edx.readthedocs.org/projects/edx-platform-api/en/latest/overview.html'
 AUTH_DOCUMENTATION_URL = 'http://edx.readthedocs.org/projects/edx-platform-api/en/latest/authentication.html'
 
+OPENEDX_REINDEX_URL = CMS_BASE_URL + '/course/{}/edevate_reindex_course/'
 EDEVATE_BASE_URL = 'http://ec2-23-22-165-116.compute-1.amazonaws.com/'
 EDEVATE_AFTER_LOGOUT_URL = '{}university/'.format(EDEVATE_BASE_URL)
 ADMIN_VERIFICATION_EMAILS = ['vladimir.sokolovskiy@10clouds.com',
