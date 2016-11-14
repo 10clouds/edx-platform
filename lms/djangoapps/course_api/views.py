@@ -229,7 +229,7 @@ class CourseStatusUpdateView(APIView):
     **Parameters:**
 
         course_key:
-            The course key for deletion.
+            The course key of the course to be updated.
 
         visible_to_staff_only:
             The course visibility param.
