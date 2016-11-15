@@ -487,7 +487,7 @@ class CourseOverview(TimeStampedModel):
         # Note: If a newly created course is not returned in this QueryList,
         # make sure the "publish" signal was emitted when the course was
         # created. For tests using CourseFactory, use emit_signals=True.
-        course_overviews = CourseOverview.objects.all().exclude(id=CourseKey.from_string(settings.SUBSCRIPTION_COURSE_KEY))
+        course_overviews = CourseOverview.objects.filter(visible_to_staff_only=False).exclude(id=CourseKey.from_string(settings.SUBSCRIPTION_COURSE_KEY))
 
         if org:
             # In rare cases, courses belonging to the same org may be accidentally assigned

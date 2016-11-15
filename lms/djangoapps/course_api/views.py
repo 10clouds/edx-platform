@@ -1,13 +1,15 @@
 """
 Course API Views
 """
-
+import requests
+from django.conf import settings
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from rest_framework.response import Response
 from rest_framework.generics import ListAPIView, RetrieveAPIView
 from rest_framework.views import APIView
 
 from cms.djangoapps.contentstore.utils import delete_course_and_groups
+from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
 from opaque_keys.edx.keys import CourseKey
 from opaque_keys import InvalidKeyError
 from xmodule.modulestore.django import modulestore
@@ -248,5 +250,46 @@ class CourseDeletionView(DeveloperErrorViewMixin, APIView):
 
         if modulestore().get_course(course_key):
             delete_course_and_groups(course_key, ModuleStoreEnum.UserID.mgmt_command)
+
+        return Response(status=204)
+
+
+@view_auth_classes(is_authenticated=False)
+class CourseStatusUpdateView(APIView):
+    """
+    **Use Cases**
+
+        Update the course visibility field
+
+    **Example Requests**
+
+        PUT /api/courses/v1/courses/update_course_status/
+
+    **Parameters:**
+
+        course_key:
+            The course key of the course to be updated.
+
+        visible_to_staff_only:
+            The course visibility param.
+
+    **Returns**
+        * Always returns 204 response
+    """
+
+    def put(self, request, *args, **kwargs):
+
+        try:
+            course_key_string = self.request.data['course_key']
+            course_key = CourseKey.from_string(course_key_string)
+        except InvalidKeyError:
+            raise Response(status=204)
+
+        if modulestore().get_course(course_key):
+            course_overview = CourseOverview.get_from_id(course_key)
+            course_overview.visible_to_staff_only = self.request.data['visible_to_staff_only']
+            course_overview.save()
+
+            requests.get(settings.OPENEDX_REINDEX_URL.format(course_key_string))
 
         return Response(status=204)

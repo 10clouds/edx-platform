@@ -88,6 +88,12 @@ $light-color: #ffffff;
         outline: none;
         font-size: 14px !important;
         font-weight: bold;
+        cursor: pointer;
+
+        &:hover {
+          background: $white !important;
+          color: $main-color;
+        }
 
         .title {
           padding: 8px 12px;

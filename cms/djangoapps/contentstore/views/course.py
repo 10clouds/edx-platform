@@ -36,7 +36,7 @@ from contentstore.course_group_config import (
     RANDOM_SCHEME,
 )
 from contentstore.course_info_model import get_course_updates, update_course_updates, delete_course_update
-from contentstore.courseware_index import CoursewareSearchIndexer, SearchIndexingError
+from contentstore.courseware_index import CoursewareSearchIndexer, SearchIndexingError, CourseAboutSearchIndexer
 from contentstore.push_notification import push_notification_enabled
 from contentstore.tasks import rerun_course
 from contentstore.utils import (
@@ -104,7 +104,7 @@ from xmodule.tabs import CourseTab, CourseTabList, InvalidTabsException
 
 log = logging.getLogger(__name__)
 
-__all__ = ['course_info_handler', 'course_handler', 'course_listing',
+__all__ = ['course_info_handler', 'course_handler', 'course_listing', 'delete_course_indexes',
            'course_info_update_handler', 'course_search_index_handler',
            'course_rerun_handler', 'edevate_reindex_course',
            'settings_handler',
@@ -346,6 +346,28 @@ def edevate_reindex_course(request, course_key_string):
     with modulestore().bulk_operations(course_key):
         try:
             CoursewareSearchIndexer.do_course_reindex(modulestore(), course_key)
+            CourseAboutSearchIndexer.remove_deleted_items(course_key)
+        except SearchIndexingError as search_err:
+            return HttpResponse(dump_js_escaped_json({
+                "user_message": search_err.error_list
+            }), content_type=content_type, status=400)
+        return HttpResponse(dump_js_escaped_json({
+            "user_message": _("Course has been successfully reindexed.")
+        }), content_type=content_type, status=200)
+
+
+@require_GET
+def delete_course_indexes(request, course_key_string):
+    """
+    The restful handler for course indexing.
+    GET
+        json: return status of indexing task
+    """
+    course_key = CourseKey.from_string(course_key_string)
+    content_type = "application/json; charset=utf-8"
+    with modulestore().bulk_operations(course_key):
+        try:
+            CourseAboutSearchIndexer.remove_deleted_items(course_key)
         except SearchIndexingError as search_err:
             return HttpResponse(dump_js_escaped_json({
                 "user_message": search_err.error_list
