@@ -4,14 +4,16 @@ Course API Views
 import requests
 from django.conf import settings
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
+from rest_framework.response import Response
 from rest_framework.generics import ListAPIView, RetrieveAPIView
 from rest_framework.views import APIView
-from rest_framework.response import Response
 
+from cms.djangoapps.contentstore.utils import delete_course_and_groups
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
 from opaque_keys.edx.keys import CourseKey
 from opaque_keys import InvalidKeyError
 from xmodule.modulestore.django import modulestore
+from xmodule.modulestore import ModuleStoreEnum
 from openedx.core.lib.api.paginators import NamespacedPageNumberPagination
 from openedx.core.lib.api.view_utils import view_auth_classes, DeveloperErrorViewMixin
 from .api import course_detail, list_courses
@@ -213,6 +215,43 @@ class CourseListView(DeveloperErrorViewMixin, ListAPIView):
             org=form.cleaned_data['org'],
             filter_=form.cleaned_data['filter_'],
         )
+
+
+@view_auth_classes(is_authenticated=False)
+class CourseDeletionView(DeveloperErrorViewMixin, APIView):
+    """
+    **Use Cases**
+
+        Delete a course
+
+    **Example Requests**
+
+        GET /api/courses/v1/courses/delete_course/{course_key}/
+
+    **Parameters:**
+
+        course_key:
+            The course key for deletion.
+
+    **Returns**
+
+        * always returns 204 response
+    """
+
+    serializer_class = CourseDetailSerializer
+
+    def get(self, request, *args, **kwargs):
+
+        course_key_string = self.kwargs['course_key_string']
+        try:
+            course_key = CourseKey.from_string(course_key_string)
+        except InvalidKeyError:
+            return Response(status=204)
+
+        if modulestore().get_course(course_key):
+            delete_course_and_groups(course_key, ModuleStoreEnum.UserID.mgmt_command)
+
+        return Response(status=204)
 
 
 @view_auth_classes(is_authenticated=False)
