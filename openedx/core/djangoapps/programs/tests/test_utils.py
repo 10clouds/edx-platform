@@ -40,8 +40,10 @@ ECOMMERCE_URL_ROOT = 'https://example-ecommerce.com'
 MARKETING_URL = 'https://www.example.com/marketing/path'
 
 
-@skipUnless(settings.ROOT_URLCONF == 'lms.urls', 'Test only valid in lms')
+@ddt.ddt
 @attr('shard_2')
+@httpretty.activate
+@skipUnless(settings.ROOT_URLCONF == 'lms.urls', 'Test only valid in lms')
 class TestProgramRetrieval(ProgramsApiConfigMixin, ProgramsDataMixin, CredentialsDataMixin,
                            CredentialsApiConfigMixin, CacheIsolationTestCase):
     """Tests covering the retrieval of programs from the Programs service."""
@@ -77,7 +79,6 @@ class TestProgramRetrieval(ProgramsApiConfigMixin, ProgramsDataMixin, Credential
             )
         ]
 
-    @httpretty.activate
     def test_get_programs(self):
         """Verify programs data can be retrieved."""
         self.create_programs_config()
@@ -92,7 +93,24 @@ class TestProgramRetrieval(ProgramsApiConfigMixin, ProgramsDataMixin, Credential
         # Verify the API was actually hit (not the cache).
         self.assertEqual(len(httpretty.httpretty.latest_requests), 1)
 
-    @httpretty.activate
+    @ddt.data(True, False)
+    def test_get_programs_category_casing(self, is_detail):
+        """Temporary. Verify that program categories are lowercased."""
+        self.create_programs_config()
+
+        program = factories.Program(category='camelCase')
+
+        if is_detail:
+            program_id = program['id']
+
+            self.mock_programs_api(data=program, program_id=program_id)
+            data = utils.get_programs(self.user, program_id=program_id)
+            self.assertEqual(data['category'], 'camelcase')
+        else:
+            self.mock_programs_api(data={'results': [program]})
+            data = utils.get_programs(self.user)
+            self.assertEqual(data[0]['category'], 'camelcase')
+
     def test_get_programs_caching(self):
         """Verify that when enabled, the cache is used for non-staff users."""
         self.create_programs_config(cache_ttl=1)
@@ -133,7 +151,6 @@ class TestProgramRetrieval(ProgramsApiConfigMixin, ProgramsDataMixin, Credential
         self.assertEqual(actual, [])
         self.assertTrue(mock_init.called)
 
-    @httpretty.activate
     def test_get_programs_data_retrieval_failure(self):
         """Verify behavior when data can't be retrieved from Programs."""
         self.create_programs_config()
@@ -142,7 +159,6 @@ class TestProgramRetrieval(ProgramsApiConfigMixin, ProgramsDataMixin, Credential
         actual = utils.get_programs(self.user)
         self.assertEqual(actual, [])
 
-    @httpretty.activate
     def test_get_programs_for_dashboard(self):
         """Verify programs data can be retrieved and parsed correctly."""
         self.create_programs_config()
@@ -165,7 +181,6 @@ class TestProgramRetrieval(ProgramsApiConfigMixin, ProgramsDataMixin, Credential
         actual = utils.get_programs_for_dashboard(self.user, self.COURSE_KEYS)
         self.assertEqual(actual, {})
 
-    @httpretty.activate
     def test_get_programs_for_dashboard_no_data(self):
         """Verify behavior when no programs data is found for the user."""
         self.create_programs_config()
@@ -174,17 +189,6 @@ class TestProgramRetrieval(ProgramsApiConfigMixin, ProgramsDataMixin, Credential
         actual = utils.get_programs_for_dashboard(self.user, self.COURSE_KEYS)
         self.assertEqual(actual, {})
 
-    @httpretty.activate
-    def test_get_programs_for_dashboard_invalid_data(self):
-        """Verify behavior when the Programs API returns invalid data and parsing fails."""
-        self.create_programs_config()
-        invalid_program = {'invalid_key': 'invalid_data'}
-        self.mock_programs_api(data={'results': [invalid_program]})
-
-        actual = utils.get_programs_for_dashboard(self.user, self.COURSE_KEYS)
-        self.assertEqual(actual, {})
-
-    @httpretty.activate
     def test_get_program_for_certificates(self):
         """Verify programs data can be retrieved and parsed correctly for certificates."""
         self.create_programs_config()
@@ -199,7 +203,6 @@ class TestProgramRetrieval(ProgramsApiConfigMixin, ProgramsDataMixin, Credential
         self.assertEqual(len(actual), 2)
         self.assertEqual(actual, expected)
 
-    @httpretty.activate
     def test_get_program_for_certificates_no_data(self):
         """Verify behavior when no programs data is found for the user."""
         self.create_programs_config()
@@ -210,7 +213,6 @@ class TestProgramRetrieval(ProgramsApiConfigMixin, ProgramsDataMixin, Credential
         actual = utils.get_programs_for_credentials(self.user, program_credentials_data)
         self.assertEqual(actual, [])
 
-    @httpretty.activate
     def test_get_program_for_certificates_id_not_exist(self):
         """Verify behavior when no program with the given program_id in
         credentials exists.
@@ -233,7 +235,6 @@ class TestProgramRetrieval(ProgramsApiConfigMixin, ProgramsDataMixin, Credential
         actual = utils.get_programs_for_credentials(self.user, credential_data)
         self.assertEqual(actual, [])
 
-    @httpretty.activate
     def test_get_display_category_success(self):
         self.create_programs_config()
         self.mock_programs_api()
@@ -679,15 +680,15 @@ class TestProgramProgressMeter(ProgramsApiConfigMixin, TestCase):
 @override_settings(ECOMMERCE_PUBLIC_URL_ROOT=ECOMMERCE_URL_ROOT)
 @skipUnless(settings.ROOT_URLCONF == 'lms.urls', 'Test only valid in lms')
 @mock.patch(UTILS_MODULE + '.get_run_marketing_url', mock.Mock(return_value=MARKETING_URL))
-class TestSupplementProgramData(ProgramsApiConfigMixin, ModuleStoreTestCase):
-    """Tests of the utility function used to supplement program data."""
+class TestProgramDataExtender(ProgramsApiConfigMixin, ModuleStoreTestCase):
+    """Tests of the program data extender utility class."""
     maxDiff = None
     sku = 'abc123'
     password = 'test'
     checkout_path = '/basket'
 
     def setUp(self):
-        super(TestSupplementProgramData, self).setUp()
+        super(TestProgramDataExtender, self).setUp()
 
         self.user = UserFactory()
         self.client.login(username=self.user.username, password=self.password)
@@ -717,7 +718,7 @@ class TestSupplementProgramData(ProgramsApiConfigMixin, ModuleStoreTestCase):
                 course_key=unicode(self.course.id),  # pylint: disable=no-member
                 course_url=reverse('course_root', args=[self.course.id]),  # pylint: disable=no-member
                 end_date=strftime_localized(self.course.end, 'SHORT_DATE'),
-                enrollment_open_date=None,
+                enrollment_open_date=strftime_localized(utils.DEFAULT_ENROLLMENT_START_DATE, 'SHORT_DATE'),
                 is_course_ended=self.course.end < timezone.now(),
                 is_enrolled=False,
                 is_enrollment_open=True,
@@ -757,7 +758,7 @@ class TestSupplementProgramData(ProgramsApiConfigMixin, ModuleStoreTestCase):
         if is_enrolled:
             CourseEnrollmentFactory(user=self.user, course_id=self.course.id, mode=enrolled_mode)  # pylint: disable=no-member
 
-        data = utils.supplement_program_data(self.program, self.user)
+        data = utils.ProgramDataExtender(self.program, self.user).extend()
 
         self._assert_supplemented(
             data,
@@ -777,7 +778,7 @@ class TestSupplementProgramData(ProgramsApiConfigMixin, ModuleStoreTestCase):
             is_active=False,
         )
 
-        data = utils.supplement_program_data(self.program, self.user)
+        data = utils.ProgramDataExtender(self.program, self.user).extend()
 
         self._assert_supplemented(data)
 
@@ -792,7 +793,7 @@ class TestSupplementProgramData(ProgramsApiConfigMixin, ModuleStoreTestCase):
 
         CourseEnrollmentFactory(user=self.user, course_id=self.course.id, mode=MODES.audit)  # pylint: disable=no-member
 
-        data = utils.supplement_program_data(self.program, self.user)
+        data = utils.ProgramDataExtender(self.program, self.user).extend()
 
         self._assert_supplemented(data, is_enrolled=True, upgrade_url=None)
 
@@ -807,17 +808,12 @@ class TestSupplementProgramData(ProgramsApiConfigMixin, ModuleStoreTestCase):
         self.course.enrollment_end = timezone.now() - datetime.timedelta(days=end_offset)
         self.course = self.update_course(self.course, self.user.id)  # pylint: disable=no-member
 
-        data = utils.supplement_program_data(self.program, self.user)
-
-        if is_enrollment_open:
-            enrollment_open_date = None
-        else:
-            enrollment_open_date = strftime_localized(self.course.enrollment_start, 'SHORT_DATE')
+        data = utils.ProgramDataExtender(self.program, self.user).extend()
 
         self._assert_supplemented(
             data,
             is_enrollment_open=is_enrollment_open,
-            enrollment_open_date=enrollment_open_date,
+            enrollment_open_date=strftime_localized(self.course.enrollment_start, 'SHORT_DATE'),
         )
 
     def test_no_enrollment_start_date(self):
@@ -828,12 +824,11 @@ class TestSupplementProgramData(ProgramsApiConfigMixin, ModuleStoreTestCase):
         self.course.enrollment_end = timezone.now() - datetime.timedelta(days=1)
         self.course = self.update_course(self.course, self.user.id)  # pylint: disable=no-member
 
-        data = utils.supplement_program_data(self.program, self.user)
+        data = utils.ProgramDataExtender(self.program, self.user).extend()
 
         self._assert_supplemented(
             data,
             is_enrollment_open=False,
-            enrollment_open_date=strftime_localized(utils.DEFAULT_ENROLLMENT_START_DATE, 'SHORT_DATE'),
         )
 
     @ddt.data(True, False)
@@ -845,7 +840,7 @@ class TestSupplementProgramData(ProgramsApiConfigMixin, ModuleStoreTestCase):
         mock_get_cert_data.return_value = {'uuid': test_uuid} if is_uuid_available else {}
         mock_html_certs_enabled.return_value = True
 
-        data = utils.supplement_program_data(self.program, self.user)
+        data = utils.ProgramDataExtender(self.program, self.user).extend()
 
         expected_url = reverse(
             'certificates:render_cert_by_uuid',
@@ -859,7 +854,7 @@ class TestSupplementProgramData(ProgramsApiConfigMixin, ModuleStoreTestCase):
         self.course.end = timezone.now() + datetime.timedelta(days=days_offset)
         self.course = self.update_course(self.course, self.user.id)  # pylint: disable=no-member
 
-        data = utils.supplement_program_data(self.program, self.user)
+        data = utils.ProgramDataExtender(self.program, self.user).extend()
 
         self._assert_supplemented(data)
 
@@ -873,14 +868,14 @@ class TestSupplementProgramData(ProgramsApiConfigMixin, ModuleStoreTestCase):
             'logo': mock_image
         }
 
-        data = utils.supplement_program_data(self.program, self.user)
+        data = utils.ProgramDataExtender(self.program, self.user).extend()
         self.assertEqual(data['organizations'][0].get('img'), mock_logo_url)
 
     @mock.patch(UTILS_MODULE + '.get_organization_by_short_name')
     def test_organization_missing(self, mock_get_organization_by_short_name):
         """ Verify the logo image is not set if the organizations api returns None """
         mock_get_organization_by_short_name.return_value = None
-        data = utils.supplement_program_data(self.program, self.user)
+        data = utils.ProgramDataExtender(self.program, self.user).extend()
         self.assertEqual(data['organizations'][0].get('img'), None)
 
     @mock.patch(UTILS_MODULE + '.get_organization_by_short_name')
@@ -890,5 +885,5 @@ class TestSupplementProgramData(ProgramsApiConfigMixin, ModuleStoreTestCase):
         but the logo is not available
         """
         mock_get_organization_by_short_name.return_value = {'logo': None}
-        data = utils.supplement_program_data(self.program, self.user)
+        data = utils.ProgramDataExtender(self.program, self.user).extend()
         self.assertEqual(data['organizations'][0].get('img'), None)
