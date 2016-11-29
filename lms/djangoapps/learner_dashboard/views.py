@@ -58,11 +58,17 @@ def program_details(request, program_id):
         raise Http404
 
     program_data = utils.get_programs(request.user, program_id=program_id)
+
+    if not program_data:
+        raise Http404
+
     program_data = utils.supplement_program_data(program_data, request.user)
+    show_program_listing = ProgramsApiConfig.current().show_program_listing
 
     context = {
         'program_data': program_data,
         'program_listing_url': reverse('program_listing_view'),
+        'show_program_listing': show_program_listing,
         'nav_hidden': True,
         'disable_courseware_js': True,
         'uses_pattern_library': True
