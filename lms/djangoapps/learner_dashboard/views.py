@@ -3,6 +3,7 @@ from urlparse import urljoin
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
+from django.core.urlresolvers import reverse
 from django.http import Http404
 from django.views.decorators.http import require_GET
 
@@ -57,14 +58,11 @@ def program_details(request, program_id):
         raise Http404
 
     program_data = utils.get_programs(request.user, program_id=program_id)
-
-    if not program_data:
-        raise Http404
-
     program_data = utils.supplement_program_data(program_data, request.user)
 
     context = {
         'program_data': program_data,
+        'program_listing_url': reverse('program_listing_view'),
         'nav_hidden': True,
         'disable_courseware_js': True,
         'uses_pattern_library': True
