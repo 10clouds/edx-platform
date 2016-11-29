@@ -1,9 +1,7 @@
 """
 Student Views
 """
-import base64
 import datetime
-import hashlib
 import logging
 import uuid
 import json
@@ -36,7 +34,7 @@ from django.utils.translation import ugettext as _, get_language
 from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
 from django.views.decorators.http import require_POST, require_GET
 from django.db.models.signals import post_save
-from django.dispatch import receiver
+from django.dispatch import receiver, Signal
 from django.template.response import TemplateResponse
 
 from rest_framework_oauth.compat import oauth2_provider
@@ -130,8 +128,9 @@ from notification_prefs.views import enable_notifications
 from openedx.core.djangoapps.credentials.utils import get_user_program_credentials
 from openedx.core.djangoapps.credit.email_utils import get_credit_provider_display_names, make_providers_strings
 from openedx.core.djangoapps.user_api.preferences import api as preferences_api
-from openedx.core.djangoapps.programs.utils import get_programs_for_dashboard
 from openedx.core.djangoapps.programs.models import ProgramsApiConfig
+from openedx.core.djangoapps.programs import utils as programs_utils
+from openedx.core.djangoapps.theming import helpers as theming_helpers
 
 
 log = logging.getLogger("edx.student")
@@ -191,8 +190,8 @@ def index(request, extra_context=None, user=AnonymousUser()):
     youtube_video_id = microsite.get_value('homepage_promo_video_youtube_id', "your-youtube-id")
     context['homepage_promo_video_youtube_id'] = youtube_video_id
 
-    # allow for microsite override of the courses list
-    context['courses_list'] = microsite.get_template_path('courses_list.html')
+    # allow for theme override of the courses list
+    context['courses_list'] = theming_helpers.get_template_path('courses_list.html')
 
     # Insert additional context for use in the template
     context.update(extra_context)
@@ -617,11 +616,11 @@ def dashboard(request):
         and has_access(request.user, 'view_courseware_with_prerequisites', enrollment.course_overview)
     )
 
-    # Get any programs associated with courses being displayed.
-    # This is passed along in the template context to allow rendering of
-    # program-related information on the dashboard.
-    course_programs = _get_course_programs(user, [enrollment.course_id for enrollment in course_enrollments])
-    xseries_credentials = _get_xseries_credentials(user)
+    # Find programs associated with courses being displayed. This information
+    # is passed in the template context to allow rendering of program-related
+    # information on the dashboard.
+    meter = programs_utils.ProgramProgressMeter(user, enrollments=course_enrollments)
+    programs_by_run = meter.engaged_programs(by_run=True)
 
     # Construct a dictionary of course mode information
     # used to render the course list.  We re-use the course modes dict
@@ -746,10 +745,9 @@ def dashboard(request):
         'order_history_list': order_history_list,
         'courses_requirements_not_met': courses_requirements_not_met,
         'nav_hidden': True,
-        'course_programs': course_programs,
-        'disable_courseware_js': True,
-        'xseries_credentials': xseries_credentials,
-        'show_program_listing': ProgramsApiConfig.current().show_program_listing
+        'programs_by_run': programs_by_run,
+        'show_program_listing': ProgramsApiConfig.current().show_program_listing,
+        'disable_courseware_js': True
     }
 
     ecommerce_service = EcommerceService()

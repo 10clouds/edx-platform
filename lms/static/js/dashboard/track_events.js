@@ -20,17 +20,6 @@ var edx = edx || {};
         return properties;
     };
 
-    // Generate object to be passed with programs events
-    edx.dashboard.generateProgramProperties = function(element) {
-        var $el = $(element);
-
-        return {
-            category: 'dashboard',
-            course_id: $el.closest('.course-container').find('.info-course-id').html(),
-            program_id: $el.data('program-id')
-        };
-    };
-
     // Emit an event when the 'course title link' is clicked.
     edx.dashboard.trackCourseTitleClicked = function($courseTitleLink, properties){
         var trackProperty = properties || edx.dashboard.generateTrackProperties;
@@ -121,7 +110,5 @@ var edx = edx || {};
         edx.dashboard.trackCourseOptionDropdownClicked($('.wrapper-action-more'));
         edx.dashboard.trackLearnVerifiedLinkClicked($('.verified-info'));
         edx.dashboard.trackFindCourseBtnClicked($('.btn-find-courses'));
-        edx.dashboard.trackXseriesBtnClicked($('.xseries-action .btn'));
-        edx.dashboard.xseriesTrackMessages();
     });
 })(jQuery);
