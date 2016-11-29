@@ -10,7 +10,6 @@ define([
         describe('Course Card View', function () {
             var view = null,
                 courseCardModel,
-                setupView,
                 context = {
                     course_modes: [],
                     display_name: 'Astrophysics: Exploring Exoplanets',
@@ -30,21 +29,32 @@ define([
                         run_key: '2T2016',
                         course_started: true,
                         is_enrolled: true,
-                        certificate_url: '',
+                        certificate_url: ''
                     }]
-                };
+                },
 
-            setupView = function(isEnrolled){
+            setupView = function(data, isEnrolled){
                 context.run_modes[0].is_enrolled = isEnrolled;
                 setFixtures('<div class="course-card card"></div>');
-                courseCardModel = new CourseCardModel(context);
+                courseCardModel = new CourseCardModel(data);
                 view = new CourseCardView({
                     model: courseCardModel
                 });
+            },
+
+            validateCourseInfoDisplay = function(){
+                //DRY validation for course card in enrolled state
+                expect(view.$('.header-img').attr('src')).toEqual(context.run_modes[0].course_image_url);
+                expect(view.$('.course-details .course-title-link').text().trim()).toEqual(context.display_name);
+                expect(view.$('.course-details .course-title-link').attr('href')).toEqual(
+                    context.run_modes[0].course_url);
+                expect(view.$('.course-details .course-text .course-key').html()).toEqual(context.key);
+                expect(view.$('.course-details .course-text .run-period').html())
+                    .toEqual(context.run_modes[0].start_date + ' - ' + context.run_modes[0].end_date);
             };
 
             beforeEach(function() {
-                setupView(false);
+                setupView(context, false);
             });
 
             afterEach(function() {
@@ -57,23 +67,32 @@ define([
 
             it('should render the course card based on the data enrolled', function() {
                 view.remove();
-                setupView(true);
-                expect(view.$('.header-img').attr('src')).toEqual(context.run_modes[0].course_image_url);
-                expect(view.$('.course-details .course-title-link').text().trim()).toEqual(context.display_name);
-                expect(view.$('.course-details .course-title-link').attr('href')).toEqual(
-                    context.run_modes[0].course_url);
-                expect(view.$('.course-details .course-text .course-key').html()).toEqual(context.key);
-                expect(view.$('.course-details .course-text .run-period').html())
-                    .toEqual(context.run_modes[0].start_date + ' - ' + context.run_modes[0].end_date);
+                setupView(context, true);
+                validateCourseInfoDisplay();
             });
 
             it('should render the course card based on the data not enrolled', function() {
-                expect(view.$('.header-img').attr('src')).toEqual(context.run_modes[0].course_image_url);
-                expect(view.$('.course-details .course-title-link').text().trim()).toEqual(context.display_name);
-                expect(view.$('.course-details .course-title-link').attr('href')).toEqual(
-                    context.run_modes[0].course_url);
-                expect(view.$('.course-details .course-text .course-key').html()).toEqual(context.key);
-                expect(view.$('.course-details .course-text .run-period').html()).not.toBeDefined();
+                validateCourseInfoDisplay();
+            });
+
+            it('should update render if the course card is_enrolled updated', function() {
+                courseCardModel.set({
+                    is_enrolled: true
+                });
+                validateCourseInfoDisplay();
+            });
+
+            it('should only show certificate status section if a certificate has been earned', function() {
+                var data = context,
+                    certUrl = 'sample-certificate';
+
+                setupView(context, false);
+                expect(view.$('certificate-status').length).toEqual(0);
+                view.remove();
+                data.run_modes[0].certificate_url = certUrl;
+                setupView(data, false);
+                expect(view.$('.certificate-status').length).toEqual(1);
+                expect(view.$('.certificate-status .cta-secondary').attr('href')).toEqual(certUrl);
             });
         });
     }
