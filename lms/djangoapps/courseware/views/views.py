@@ -68,6 +68,7 @@ from openedx.core.djangoapps.credit.api import (
     is_user_eligible_for_credit,
     is_credit_course
 )
+from openedx.core.djangoapps.catalog.utils import get_programs
 from openedx.core.djangoapps.theming import helpers as theming_helpers
 from shoppingcart.utils import is_shopping_cart_enabled
 from openedx.core.djangoapps.self_paced.models import SelfPacedConfiguration
@@ -125,6 +126,7 @@ def courses(request):
     Render "find courses" page.  The course selection work is done in courseware.courses.
     """
     courses_list = []
+    programs_list = []
     course_discovery_meanings = getattr(settings, 'COURSE_DISCOVERY_MEANINGS', {})
     if not settings.FEATURES.get('ENABLE_COURSE_DISCOVERY'):
         courses_list = get_courses(request.user)
@@ -137,9 +139,16 @@ def courses(request):
         else:
             courses_list = sort_by_announcement(courses_list)
 
+    # getting all the programs from catalog
+    if settings.FEATURES["DISPLAY_PROGRAMS_ON_MARKETING_PAGES"]:
+        programs_list = get_programs(request.user)
     return render_to_response(
         "courseware/courses.html",
-        {'courses': courses_list, 'course_discovery_meanings': course_discovery_meanings}
+        {
+            'courses': courses_list,
+            'course_discovery_meanings': course_discovery_meanings,
+            'programs_list': programs_list
+        }
     )
 
 
