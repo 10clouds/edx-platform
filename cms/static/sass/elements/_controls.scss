@@ -130,19 +130,25 @@
 
 // blue secondary button
 %btn-secondary-blue {
-  @extend %ui-btn-secondary;
-  border-color: $blue-l3;
+  border-width: 1px;
+  border-style: solid;
+  display: inline-block;
+  cursor: pointer;
+  background: transparent;
+  line-height: 1.5em;
+  text-align: center;
+  border-color: $blue;
   color: $blue;
 
   &:hover, &:active {
-    background: $blue-l4;
-    color: $blue-s2;
+    background: $blue;
+    color: $white;
   }
 
   &.current, &.active {
-    border-color: $blue-l3;
-    background: $blue-l3;
-    color: $blue-d1;
+    border-color: $blue;
+    background: $blue;
+    color: $white;
 
     &:hover, &:active {
 

@@ -11,6 +11,18 @@
 // #BUTTONS
 // ------------------------------
 .btn {
+  border: 1px solid $blue;
+  background: transparent;
+  color: $blue;
+  font-size: 1.4rem;
+
+  &:hover,
+  &:focus,
+  &:active {
+    color: $white;
+    background: $blue;
+  }
+
   &.btn-delete,
   &.btn-edit {
     border: none;
@@ -33,24 +45,24 @@
   }
 
   &.btn-create {
-    background: palette(success, base);
-    border-color: palette(success, base);
+    background: transparent;
+    border: 1px solid $blue;
 
     // STATE: hover and focus
     &:hover,
     &.is-hovered,
     &:focus,
     &.is-focused {
-      background: shade($success, 33%);
-      color: palette(primary, accent);
+      background: $blue;
+      color: $white;
     }
 
     // STATE: is pressed or active
     &:active,
     &.is-pressed,
     &.is-active {
-      border-color: shade($success, 33%);
-      background: shade($success, 33%);
+      color: $white;
+      background: blue;
     }
 
     .text {
@@ -81,6 +93,7 @@
   .field-message {
     min-with: 300px;
     width: 50%;
+    font-size: 1.4rem;
 
     &.is-hidden {
       @extend .is-hidden;
@@ -89,11 +102,38 @@
 
   .copy {
     vertical-align: middle;
+    font-size: 1.6rem;
+    color: inherit;
   }
+}
+
+.field-label {
+  font-size: 1.6rem;
+}
+
+.input-select {
+  height: 4rem;
+  line-height: 1.25rem;
+  padding: 0;
 }
 
 .form-group {
   &.bg-white {
     background-color: $white;
+    padding: 25px;
   }
+
+  .field {
+    .field-hint {
+      font-size: 1.2rem;
+    }
+  }
+}
+
+.hd-1.emphasized, .hd-2.emphasized, .hd-3.emphasized, .hd-4.emphasized, 
+.hd-5.emphasized, .hd-6.emphasized, .alert-title {
+    color: #4b4b4b;
+    font-weight: 600;
+    font-size: 1.6rem;
+    margin: 20px 0;
 }
