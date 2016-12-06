@@ -127,6 +127,10 @@ class CASBackend(object):
            NB: Use of PT to identify proxy
         """
         username, authentication_response = _verify(ticket, service)
+
+        first_name = authentication_response[0][1].find(CAS + 'first_name').text
+        last_name = authentication_response[0][1].find(CAS + 'last_name').text
+
         if not username:
             return None
 
@@ -136,6 +140,11 @@ class CASBackend(object):
             u_name = username
             user = User(username=u_name, email=username)
             user.set_unusable_password()
+
+        if first_name:
+            user.first_name = first_name
+        if last_name:
+            user.last_name = last_name
 
         if authentication_response and _CAS_USER_DETAILS_RESOLVER:
             _CAS_USER_DETAILS_RESOLVER(user, authentication_response)

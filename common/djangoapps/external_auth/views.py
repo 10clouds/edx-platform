@@ -397,7 +397,7 @@ def ssl_login_shortcut(fn):
             return fn(*args, **kwargs)
 
         cert = ssl_get_cert_from_request(request)
-        if not cert:		# no certificate information - show normal login window
+        if not cert:        # no certificate information - show normal login window
             return fn(*args, **kwargs)
 
         def retfun():
@@ -478,13 +478,11 @@ def cas_login(request, next_page=None, required=False):
 
     if request.user.is_authenticated():
         user = request.user
-        UserProfile.objects.get_or_create(
-            user=user,
-            defaults={'name': user.username}
-        )
-        Subscriber.objects.get_or_create(
-            user=user
-        )
+        profile, _ = UserProfile.objects.get_or_create(user=user)
+        profile.name = user.get_full_name()
+        profile.save()
+
+        Subscriber.objects.get_or_create(user=user)
 
     return ret
 
