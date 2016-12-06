@@ -84,8 +84,7 @@ main {
           // CASE: new/create button
           &.new-button,
           &.button-new {
-            @extend %btn-primary-green;
-            @extend %sizing;
+            @extend %btn-secondary-blue;
           }
         }
       }
