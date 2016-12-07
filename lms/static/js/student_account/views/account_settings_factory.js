@@ -35,39 +35,25 @@
                             })
                         },
                         {
-                            view: new FieldViews.TextFieldView({
+                            view: new FieldViews.ReadonlyFieldView({
                                 model: userAccountModel,
                                 title: gettext('Full Name'),
                                 valueAttribute: 'name',
                                 helpMessage: gettext(
                                     'The name that is used for ID verification and appears on your certificates. Other learners never see your full name. Make sure to enter your name exactly as it appears on your government-issued photo ID, including any non-Roman characters.' /* jshint ignore:line */
-                                ),
-                                persistChanges: true
+                                )
                             })
                         },
-                        // {
-                        //     view: new AccountSettingsFieldViews.EmailFieldView({
-                        //         model: userAccountModel,
-                        //         title: gettext('Email Address'),
-                        //         valueAttribute: 'email',
-                        //         helpMessage: interpolate_text(
-                        //             gettext('The email address you use to sign in. Communications from {platform_name} and your courses are sent to this address.'), {platform_name: platformName}
-                        //         ),
-                        //         persistChanges: true
-                        //     })
-                        // },
-                        // {
-                        //     view: new AccountSettingsFieldViews.PasswordFieldView({
-                        //         model: userAccountModel,
-                        //         title: gettext('Password'),
-                        //         screenReaderTitle: gettext('Reset your Password'),
-                        //         valueAttribute: 'password',
-                        //         emailAttribute: 'email',
-                        //         linkTitle: gettext('Reset Password'),
-                        //         linkHref: fieldsData.password.url,
-                        //         helpMessage: gettext('When you click "Reset Password", a message will be sent to your email address. Click the link in the message to reset your password.')
-                        //     })
-                        // },
+                        {
+                            view: new FieldViews.ReadonlyFieldView({
+                                model: userAccountModel,
+                                title: gettext('Email Address'),
+                                valueAttribute: 'email',
+                                helpMessage: interpolate_text(
+                                    gettext('The email address you use to sign in. Communications from {platform_name} and your courses are sent to this address.'), {platform_name: platformName}
+                                )
+                            })
+                        },
                         {
                             view: new AccountSettingsFieldViews.LanguagePreferenceFieldView({
                                 model: userPreferencesModel,
