@@ -2636,11 +2636,11 @@ COUNTRIES_OVERRIDE = {
 
 # which access.py permission name to check in order to determine if a course is visible in
 # the course catalog. We default this to the legacy permission 'see_exists'.
-COURSE_CATALOG_VISIBILITY_PERMISSION = 'see_exists'
+COURSE_CATALOG_VISIBILITY_PERMISSION = 'enroll'
 
 # which access.py permission name to check in order to determine if a course about page is
 # visible. We default this to the legacy permission 'see_exists'.
-COURSE_ABOUT_VISIBILITY_PERMISSION = 'see_exists'
+COURSE_ABOUT_VISIBILITY_PERMISSION = 'enroll'
 
 
 # Enrollment API Cache Timeout
@@ -2934,4 +2934,4 @@ EDEVATE_BASE_URL = 'http://ec2-23-22-165-116.compute-1.amazonaws.com/'
 EDEVATE_AFTER_LOGOUT_URL = '{}university/'.format(EDEVATE_BASE_URL)
 ADMIN_VERIFICATION_EMAILS = ['vladimir.sokolovskiy@10clouds.com',
                              'sergey.kospanov@10clouds.com',
-                             'adam.dziuba@10clouds.com']
+                             'tomasz.wielgus@10clouds.com']
