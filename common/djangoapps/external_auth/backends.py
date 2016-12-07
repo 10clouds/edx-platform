@@ -61,13 +61,13 @@ def _verify_cas2(ticket, service):
         pgtIouId = pgtIouIdElement.text if pgtIouIdElement is not None else None
 
         if pgtIouId:
-            pgtIou = PgtIOU.objects.get(pgtIou = pgtIouId)
+            pgtIou = PgtIOU.objects.get(pgtIou=pgtIouId)
             try:
-                tgt = Tgt.objects.get(username = username)
+                tgt = Tgt.objects.get(username=username)
                 tgt.tgt = pgtIou.tgt
                 tgt.save()
             except ObjectDoesNotExist:
-                Tgt.objects.create(username = username, tgt = pgtIou.tgt)
+                Tgt.objects.create(username=username, tgt=pgtIou.tgt)
 
             pgtIou.delete()
         return username, tree
@@ -128,9 +128,6 @@ class CASBackend(object):
         """
         username, authentication_response = _verify(ticket, service)
 
-        first_name = authentication_response[0][1].find(CAS + 'first_name').text
-        last_name = authentication_response[0][1].find(CAS + 'last_name').text
-
         if not username:
             return None
 
@@ -141,10 +138,12 @@ class CASBackend(object):
             user = User(username=u_name, email=username)
             user.set_unusable_password()
 
-        if first_name:
-            user.first_name = first_name
-        if last_name:
-            user.last_name = last_name
+        try:
+            # get user's full name from authentication response(xml tree)
+            user.first_name = authentication_response[0][1].find(CAS + 'first_name').text
+            user.last_name = authentication_response[0][1].find(CAS + 'last_name').text
+        except IndexError:
+            pass
 
         if authentication_response and _CAS_USER_DETAILS_RESOLVER:
             _CAS_USER_DETAILS_RESOLVER(user, authentication_response)

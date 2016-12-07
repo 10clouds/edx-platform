@@ -478,9 +478,13 @@ def cas_login(request, next_page=None, required=False):
 
     if request.user.is_authenticated():
         user = request.user
-        profile, _ = UserProfile.objects.get_or_create(user=user)
-        profile.name = user.get_full_name()
-        profile.save()
+        profile, created = UserProfile.objects.get_or_create(
+            user=user,
+            defaults={'name': user.get_full_name()}
+        )
+        if not created:
+            profile.name = user.get_full_name()
+            profile.save()
 
         Subscriber.objects.get_or_create(user=user)
 
