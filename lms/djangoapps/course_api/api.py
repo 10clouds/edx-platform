@@ -27,7 +27,7 @@ def get_effective_user(requesting_user, target_username):
         raise PermissionDenied()
 
 
-def course_detail(request, username, course_key):
+def course_detail(request, username, course_key, permission=None):
     """
     Return a single course identified by `course_key`.
 
@@ -42,14 +42,18 @@ def course_detail(request, username, course_key):
         username (string):
             The name of the user `requesting_user would like to be identified as.
         course_key (CourseKey): Identifies the course of interest
+        permission (string):
+            Permission course visibility string
 
     Return value:
         `CourseOverview` object representing the requested course
     """
+    if not permission:
+        permission = get_permission_for_course_about()
     user = get_effective_user(request.user, username)
     return get_course_overview_with_access(
         user,
-        get_permission_for_course_about(),
+        permission,
         course_key,
     )
 

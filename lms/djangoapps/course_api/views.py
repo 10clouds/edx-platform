@@ -116,16 +116,19 @@ class CourseDetailView(DeveloperErrorViewMixin, RetrieveAPIView):
         Return the requested course object, if the user has appropriate
         permissions.
         """
+        permission = None
         requested_params = self.request.query_params.copy()
         requested_params.update({'course_key': self.kwargs['course_key_string']})
         form = CourseDetailGetForm(requested_params, initial={'requesting_user': self.request.user})
         if not form.is_valid():
             raise ValidationError(form.errors)
-
+        if 'admin_verification' in requested_params:
+            permission = 'see_exists'
         return course_detail(
             self.request,
             form.cleaned_data['username'],
             form.cleaned_data['course_key'],
+            permission
         )
 
 
