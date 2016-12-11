@@ -1202,4 +1202,4 @@ EDEVATE_BASE_URL = 'http://ec2-23-22-165-116.compute-1.amazonaws.com/'
 EDEVATE_AFTER_LOGOUT_URL = '{}university/'.format(EDEVATE_BASE_URL)
 ADMIN_VERIFICATION_EMAILS = ['vladimir.sokolovskiy@10clouds.com',
                              'sergey.kospanov@10clouds.com',
-                             'adam.dziuba@10clouds.com']
+                             'tomasz.wielgus@10clouds.com']
