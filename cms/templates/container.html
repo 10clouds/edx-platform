@@ -82,11 +82,13 @@ from openedx.core.djangolib.markup import Text, HTML
                             <span class="action-button-text">${_("View Live Version")}</span>
                         </a>
                     </li>
+                    <%doc>
                     <li class="action-item action-preview nav-item">
                         <a href="${draft_preview_link}" class="button button-preview action-button" rel="external" title="${_('Preview the courseware in the LMS')}">
                             <span class="action-button-text">${_("Preview")}</span>
                         </a>
                     </li>
+                    </%doc>
                 % else:
                     <li class="action-item action-edit nav-item">
                         <a href="#" class="button button-edit action-button edit-button">
