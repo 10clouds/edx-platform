@@ -82,8 +82,6 @@ def delete_course_and_groups(course_key, user_id):
 
     with module_store.bulk_operations(course_key):
         module_store.delete_course(course_key, user_id)
-
-        print 'removing User permissions from course....'
         # in the django layer, we need to remove all the user permissions groups associated with this course
         try:
             remove_all_instructors(course_key)
