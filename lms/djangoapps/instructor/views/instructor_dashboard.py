@@ -395,6 +395,9 @@ def set_course_mode_price(request, course_id):
         min_price=course_price,
         currency=currency
     )
+    from xmodule.modulestore.django import SignalHandler
+    signal_handler = SignalHandler(modulestore())
+    signal_handler.send('course_published', course_key=course_key)
     return JsonResponse({'message': _("CourseMode price updated successfully")})
 
 
