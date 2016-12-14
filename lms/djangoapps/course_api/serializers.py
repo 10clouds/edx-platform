@@ -8,6 +8,7 @@ from django.conf import settings
 from django.core.urlresolvers import reverse
 from rest_framework import serializers
 
+from course_modes.models import CourseMode
 from openedx.core.djangoapps.models.course_details import CourseDetails
 from openedx.core.lib.api.fields import AbsoluteURLField
 
@@ -73,9 +74,16 @@ class CourseSerializer(serializers.Serializer):  # pylint: disable=abstract-meth
     start_display = serializers.CharField()
     start_type = serializers.CharField()
     pacing = serializers.CharField()
+    price = serializers.SerializerMethodField()
 
     # 'course_id' is a deprecated field, please use 'id' instead.
     course_id = serializers.CharField(source='id', read_only=True)
+
+    def get_price(self, course_overview):
+        paid_modes = CourseMode.paid_modes_for_course(course_overview.id)
+        if paid_modes:
+            return str(paid_modes[0].min_price)
+        return '0.00'
 
     def get_subject(self, course_overview):
         if course_overview.subject:
