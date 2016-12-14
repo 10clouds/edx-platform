@@ -83,7 +83,7 @@ class CourseSerializer(serializers.Serializer):  # pylint: disable=abstract-meth
         paid_modes = CourseMode.paid_modes_for_course(course_overview.id)
         if paid_modes:
             return str(paid_modes[0].min_price)
-        return
+        return '0.00'
 
     def get_subject(self, course_overview):
         if course_overview.subject:

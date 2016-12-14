@@ -25,7 +25,7 @@ from mock import patch
 from lms.djangoapps.lms_xblock.runtime import quote_slashes
 from openedx.core.lib.xblock_utils import wrap_xblock
 from xmodule.html_module import HtmlDescriptor
-from xmodule.modulestore.django import modulestore
+from xmodule.modulestore.django import modulestore, SignalHandler
 from xmodule.tabs import CourseTab
 from xblock.field_data import DictFieldData
 from xblock.fields import ScopeIds
@@ -395,7 +395,7 @@ def set_course_mode_price(request, course_id):
         min_price=course_price,
         currency=currency
     )
-    from xmodule.modulestore.django import SignalHandler
+
     signal_handler = SignalHandler(modulestore())
     signal_handler.send('course_published', course_key=course_key)
     return JsonResponse({'message': _("CourseMode price updated successfully")})
