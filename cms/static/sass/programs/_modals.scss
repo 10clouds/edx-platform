@@ -15,56 +15,50 @@
 
 .modal-window {
   position: absolute;
-  background-color: $black;
+  background-color: #fbfbfb;
   width: 80%;
   left: 10%;
   top: 40%;
   z-index: 1001;
+  border-radius: 4px;
+  border: 10px solid;
 }
 
 .modal-content {
-  margin: 5px;
+  margin: 10px;
   padding: 20px;
-  background-color: palette(grayscale, dark);
-  border-top: 5px solid palette(warning, accent);
+  background-color: transparent;
+  border-radius: 4px;
 
   .copy {
-    color: $white;
+    color: #585858;
+  }
+
+  .copy-base {
+    font-size: 1.4rem;
   }
 
   .emphasized {
-    color: $white;
-    font-weight: font-weight(bold);
+    color: #585858;
+    font-weight: 600;
+    font-size: 1.6rem;
   }
 }
 
 .modal-actions {
   padding: 10px 20px;
 
-  .btn {
-    color: palette(grayscale, back);
-  }
-
-  .btn-brand {
-    background: palette(warning, back);
-    color: palette(grayscale, dark);
-    border-color: palette(warning, accent);
-
-    &:hover,
-    &:focus,
-    &:active {
-      background: palette(warning, back);
-      border-color: palette(warning, accent);
-    }
-  }
-
-  .btn-neutral {
+  .btn-brand, .btn-neutral {
     background: transparent;
+    color: #0ca8e3;
     border-color: #0ca8e3;
+
     &:hover,
     &:focus,
     &:active {
-      border-color: palette(grayscale, back)
+      background: #0ca8e3;
+      border-color: #0ca8e3;
+      color: white;
     }
   }
 }
