@@ -168,7 +168,7 @@ def instructor_dashboard_2(request, course_id):
     # This is used to generate example certificates
     # and enable self-generated certificates for a course.
     certs_enabled = CertificateGenerationConfiguration.current().enabled
-    if certs_enabled and access['admin']:
+    if certs_enabled and (access['admin'] or access['instructor']):
         sections.append(_section_certificates(course))
 
     disable_buttons = not _is_small_course(course_key)
