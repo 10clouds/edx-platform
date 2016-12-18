@@ -148,8 +148,12 @@ def instructor_dashboard_2(request, course_id):
         sections.append(_section_metrics(course, access))
 
     # Gate access to Ecommerce tab
-    if course_mode_has_price and (access['finance_admin'] or access['sales_admin']):
-        sections.append(_section_e_commerce(course, access, paid_modes[0], is_white_label, is_white_label))
+    if access['finance_admin'] or access['sales_admin'] or access['admin']:
+        if course_mode_has_price:
+            paid_mode = paid_modes[0]
+        else:
+            paid_mode = CourseMode.DEFAULT_SHOPPINGCART_MODE
+        sections.append(_section_e_commerce(course, access, paid_mode, is_white_label, is_white_label))
 
     # Gate access to Special Exam tab depending if either timed exams or proctored exams
     # are enabled in the course
