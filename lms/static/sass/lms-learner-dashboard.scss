@@ -2,12 +2,23 @@
 // LMS Learner Dashboard styling
 // users the Pattern Library
 
-// NOTE: This is the left-to-right (LTR) configured style compile.
-// It should mirror lms-learner-dashboard-rtl w/ the exception of bi-app references.
 
+// libs and resets
+@import 'bourbon/bourbon'; // lib - bourbon
+@import 'vendor/bi-app/bi-app-ltr'; // set the layout for left to right languages
 
-// Load the LTR version of lms main
-@import 'lms-main-v2';
+// BASE  *default edX offerings*
+// ====================
 
-// Load the shared build
+// base - utilities
+@import 'base/reset';
+@import 'base/variables';
+@import 'base/mixins';
+
+// This comment is used by preprocess_assets.py to include resources from a
+// theme, for old-style deprecated theming.
+//<THEME-OVERRIDE>
+
+@import 'build-lms-v1'; // shared app style assets/rendering
+
 @import 'build-learner-dashboard';

@@ -2,26 +2,32 @@
   @include left(0);
   display: inline-block;
   position: absolute;
-  top: -1000px;
+  top: -999999px;
   overflow: hidden;
 }
 
-.program-card{
-  @include span(12);  
+.program-card {
+  @include span(12, none);
   border: 1px solid $border-color-l3;
   border-bottom: none;
-  margin-bottom: $baseline + px;
+  margin-bottom: $baseline;
   position: relative;
+  width: calc(40% - 1rem) !important;
 
-  @include susy-media($bp-screen-md) {
-    @include span(6);
+  @media(min-width: $bp-screen-md) {
+    @include span(6, none);
 
     &:nth-child(2n) {
-      @include margin-right(0);
+      @include span(6, none);
+      width: calc(40% - 1rem) !important;
+    }
+    &:nth-child(2n+1) {
+      @include span(6, none);
+      width: calc(40% - 1rem) !important;
     }
   }
 
-  .card-link{
+  .card-link {
     @include left(0);
     @include right(0);
     position: absolute;
@@ -30,23 +36,24 @@
     border: 0;
     z-index: 1;
     opacity: 0.8;
-    
+
     &:active,
     &:hover,
-    &:focus{
+    &:focus {
       opacity: 1;
     }
 
-    .banner-image-container{
+    .banner-image-container {
       position: relative;
       overflow: hidden;
       height: 166px;
+      background: url('../themes/stanford/images/courses_placeholder.png') no-repeat;
+      background-position: center;
+      @media(min-width: $bp-screen-sm) { height: 242px; }
+      @media(min-width: $bp-screen-md) { height: 116px; }
+      @media(min-width: $bp-screen-lg) { height: 145px; }
 
-      @include susy-media($bp-screen-sm) { height: 242px; }
-      @include susy-media($bp-screen-md) { height: 116px; }
-      @include susy-media($bp-screen-lg) { height: 145px; }
-
-      .banner-image{
+      .banner-image {
         @include left(50%);
         position: absolute;
         top: 0;
@@ -57,53 +64,65 @@
     }
   }
 
-  .text-section{
-    padding: 40px $baseline + px $baseline + px;
+  .text-section {
+    padding: 40px $baseline $baseline;
     position: relative;
     margin-top: 156px;
 
-    @include susy-media($bp-screen-sm) { margin-top: 232px; }
-    @include susy-media($bp-screen-md) { margin-top: 106px; }
-    @include susy-media($bp-screen-lg) { margin-top: 135px; }
+    @media(min-width: $bp-screen-sm) { margin-top: 232px; }
+    @media(min-width: $bp-screen-md) { margin-top: 106px; }
+    @media(min-width: $bp-screen-lg) { margin-top: 135px; }
   }
 
-  .meta-info{
-    font-size: font-size(x-small);
-    color: palette(grayscale, dark);
+  .meta-info {
+    font-size: 1rem;
+    color: #111;
     position: absolute;
-    top: $baseline + px;
+    top: $baseline;
     width: calc(100% - 40px);
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: flex-start;
+    box-sizing: border-box;
+    margin: 0 auto;
   }
 
-  .organization{
+  .organization {
     @include span(6);
+    margin-left: 0 !important;
     white-space: nowrap;
     overflow: hidden;
   }
 
-  .category{
+  .category {
     @include span(6);
     @include text-align(right);
+    margin: 0 auto;
+    position: inherit;
+    right: 0;
 
-    .category-text{
-        @include float(right);
+    .category-text {
+      @include float(right);
     }
 
-    .xseries-icon{
+    .category-icon {
       @include float(right);
-      @include margin-right($baseline*0.25 + px);
-      background: url('#{$static-path}/images/icon-sm-xseries-black.png') no-repeat;
+      @include margin-right($baseline*0.25);
       background-color: transparent;
       background-size: 100%;
-      width: ($baseline*0.7 + px);
-      height: ($baseline*0.7 + px);
+      width: ($baseline*0.7);
+      height: ($baseline*0.7);
     }
   }
-  
+
   .hd-3 {
-    color: palette(grayscale, x-dark);
-    min-height: ($baseline*3) + px;
-    line-height: 1;
+    margin: 10px 0;
+    color: #222;
+    min-height: ($baseline*3);
+    line-height: 1 !important;
+    font: normal 1.2em/1.6em "titilium",Helvetica Neue,Helvetica,Arial,sans-serif !important;
   }
 
   .certificate-status {
@@ -114,7 +133,7 @@
       color: palette(grayscale, dark);
       line-height: 1;
     }
- 
+
     .secondary {
       @extend %hide-until-focus;
     }
@@ -138,7 +157,7 @@
 
   .progress {
     height: 5px;
-    background: palette(grayscale-cool, x-light);
+    background: #d9d9d9;
 
     .bar {
       @include float(left);
@@ -146,11 +165,167 @@
       position: relative;
 
       &.complete {
-        background: palette(success, dark);
+        background: #009b00;
       }
 
       &.in-progress {
-        background: palette(warning, base);
+        background: #0ca8e3;
+      }
+    }
+  }
+}
+
+
+.public-program-card {
+  @include span(12, none);
+  border: 1px solid $border-color-l3;
+  border-bottom: none;
+  margin-bottom: $baseline;
+  position: relative;
+  width: calc(30% - 1rem) !important;
+  float: left !important;
+  margin-right: $baseline/2 !important;
+
+  .card-link {
+    @include left(0);
+    @include right(0);
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    border: 0;
+    z-index: 1;
+    opacity: 0.8;
+
+    &:active,
+    &:hover,
+    &:focus {
+      opacity: 1;
+    }
+
+    .banner-image-container {
+      position: relative;
+      overflow: hidden;
+      background: url('../themes/stanford/images/courses_placeholder.png') no-repeat;
+      background-position: center;
+      height: 145px;
+
+      .banner-image {
+        @include left(50%);
+        position: absolute;
+        top: 0;
+        z-index: 0;
+        transform: translate(-50%, 0);
+        min-height: 100%;
+      }
+    }
+  }
+
+  .text-section {
+    padding: 40px $baseline $baseline;
+    position: relative;
+    margin-top: 156px;
+
+    @media(min-width: $bp-screen-sm) { margin-top: 232px; }
+    @media(min-width: $bp-screen-md) { margin-top: 106px; }
+    @media(min-width: $bp-screen-lg) { margin-top: 135px; }
+  }
+
+  .meta-info {
+    font-size: 1rem;
+    color: #111;
+    position: absolute;
+    top: $baseline;
+    width: calc(100% - 40px);
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: flex-start;
+    box-sizing: border-box;
+    margin: 0 auto;
+  }
+
+  .organization {
+    @include span(6);
+    margin-left: 0 !important;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  .category {
+    @include span(6);
+    @include text-align(right);
+    margin: 0 auto;
+    position: inherit;
+    right: 0;
+
+    .category-text {
+      @include float(right);
+    }
+
+    .category-icon {
+      @include float(right);
+      @include margin-right($baseline*0.25);
+      background-color: transparent;
+      background-size: 100%;
+      width: ($baseline*0.7);
+      height: ($baseline*0.7);
+    }
+  }
+
+  .hd-3 {
+    margin: 10px 0;
+    color: #222;
+    min-height: ($baseline*3);
+    line-height: 1 !important;
+    font: normal 1.2em/1.6em "titilium",Helvetica Neue,Helvetica,Arial,sans-serif !important;
+  }
+
+  .certificate-status {
+    margin-bottom: 0;
+
+    .status-text {
+      font-size: font-size(x-small);
+      color: palette(grayscale, dark);
+      line-height: 1;
+    }
+
+    .secondary {
+      @extend %hide-until-focus;
+    }
+
+    .status-text {
+      &:focus,
+      &:active {
+        position: relative;
+        top: 4px;
+        width: auto;
+        height: auto;
+        margin: 0;
+        text-decoration: none;
+
+        & ~ .status-text {
+          @extend %hide-until-focus;
+        }
+      }
+    }
+  }
+
+  .progress {
+    height: 5px;
+    background: #d9d9d9;
+
+    .bar {
+      @include float(left);
+      height: 100%;
+      position: relative;
+
+      &.complete {
+        background: #009b00;
+      }
+
+      &.in-progress {
+        background: #0ca8e3;
       }
     }
   }

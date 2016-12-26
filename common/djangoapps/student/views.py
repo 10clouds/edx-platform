@@ -1,9 +1,7 @@
 """
 Student Views
 """
-import base64
 import datetime
-import hashlib
 import logging
 import uuid
 import json
@@ -39,7 +37,6 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.template.response import TemplateResponse
 
-from rest_framework_oauth.compat import oauth2_provider
 from ratelimitbackend.exceptions import RateLimitException
 
 from social.apps.django_app import utils as social_utils
@@ -71,7 +68,6 @@ from opaque_keys import InvalidKeyError
 from opaque_keys.edx.keys import CourseKey
 from opaque_keys.edx.locations import SlashSeparatedCourseKey
 from opaque_keys.edx.locator import CourseLocator
-from xmodule.modulestore import ModuleStoreEnum
 
 from collections import namedtuple
 
@@ -127,10 +123,9 @@ from eventtracking import tracker
 from notification_prefs.views import enable_notifications
 
 # Note that this lives in openedx, so this dependency should be refactored.
-from openedx.core.djangoapps.credentials.utils import get_user_program_credentials
 from openedx.core.djangoapps.credit.email_utils import get_credit_provider_display_names, make_providers_strings
 from openedx.core.djangoapps.user_api.preferences import api as preferences_api
-from openedx.core.djangoapps.programs.utils import get_programs_for_dashboard, get_display_category
+from openedx.core.djangoapps.programs import utils as programs_utils
 from openedx.core.djangoapps.programs.models import ProgramsApiConfig
 
 
@@ -553,12 +548,32 @@ def is_course_blocked(request, redeemed_registration_codes, course_key):
 @login_required
 @ensure_csrf_cookie
 def dashboard(request):
+    """
+    Provides the LMS dashboard view
+
+    TODO: This is lms specific and does not belong in common code.
+
+    Arguments:
+        request: The request object.
+
+    Returns:
+        The dashboard response.
+
+    """
     user = request.user
 
     platform_name = microsite.get_value("platform_name", settings.PLATFORM_NAME)
+    enable_verified_certificates = microsite.get_value(
+        'ENABLE_VERIFIED_CERTIFICATES',
+        settings.FEATURES.get('ENABLE_VERIFIED_CERTIFICATES')
+    )
+    display_course_modes_on_dashboard = microsite.get_value(
+        'DISPLAY_COURSE_MODES_ON_DASHBOARD',
+        settings.FEATURES.get('DISPLAY_COURSE_MODES_ON_DASHBOARD', True)
+    )
 
-    # for microsites, we want to filter and only show enrollments for courses within
-    # the microsites 'ORG'
+    # we want to filter and only show enrollments for courses within
+    # the 'ORG' defined in configuration.
     course_org_filter = microsite.get_value('course_org_filter')
 
     # Let's filter out any courses in an "org" that has been declared to be
@@ -617,11 +632,11 @@ def dashboard(request):
         and has_access(request.user, 'view_courseware_with_prerequisites', enrollment.course_overview)
     )
 
-    # Get any programs associated with courses being displayed.
-    # This is passed along in the template context to allow rendering of
-    # program-related information on the dashboard.
-    course_programs = _get_course_programs(user, [enrollment.course_id for enrollment in course_enrollments])
-    xseries_credentials = _get_xseries_credentials(user)
+    # Find programs associated with courses being displayed. This information
+    # is passed in the template context to allow rendering of program-related
+    # information on the dashboard.
+    meter = programs_utils.ProgramProgressMeter(user, enrollments=course_enrollments)
+    programs_by_run = meter.engaged_programs(by_run=True)
 
     # Construct a dictionary of course mode information
     # used to render the course list.  We re-use the course modes dict
@@ -670,11 +685,11 @@ def dashboard(request):
     statuses = ["approved", "denied", "pending", "must_reverify"]
     reverifications = reverification_info(statuses)
 
-    show_refund_option_for = frozenset(
-        enrollment.course_id for enrollment in course_enrollments
-        if enrollment.refundable()
-    )
-
+    # show_refund_option_for = frozenset(
+    #     enrollment.course_id for enrollment in course_enrollments
+    #     if enrollment.refundable()
+    # )
+    show_refund_option_for = frozenset()
     block_courses = frozenset(
         enrollment.course_id for enrollment in course_enrollments
         if is_course_blocked(
@@ -746,10 +761,10 @@ def dashboard(request):
         'order_history_list': order_history_list,
         'courses_requirements_not_met': courses_requirements_not_met,
         'nav_hidden': True,
-        'course_programs': course_programs,
+        'programs_by_run': programs_by_run,
+        'show_program_listing': ProgramsApiConfig.current().show_program_listing,
         'disable_courseware_js': True,
-        'xseries_credentials': xseries_credentials,
-        'show_program_listing': ProgramsApiConfig.current().show_program_listing
+        'display_course_modes_on_dashboard': enable_verified_certificates and display_course_modes_on_dashboard,
     }
 
     ecommerce_service = EcommerceService()
@@ -1109,7 +1124,7 @@ def change_enrollment(request, check_access=True):
         if certificate_info.get('status') in DISABLE_UNENROLL_CERT_STATES:
             return HttpResponseBadRequest(_("Your certificate prevents you from unenrolling from this course"))
 
-        CourseEnrollment.unenroll(user, course_id)
+        CourseEnrollment.unenroll(user, course_id, skip_refund=True)
         return HttpResponse()
     else:
         return HttpResponseBadRequest(_("Enrollment action is invalid"))
@@ -2481,73 +2496,3 @@ def change_email_settings(request):
         )
 
     return JsonResponse({"success": True})
-
-
-def _get_course_programs(user, user_enrolled_courses):  # pylint: disable=invalid-name
-    """Build a dictionary of program data required for display on the student dashboard.
-
-    Given a user and an iterable of course keys, find all programs relevant to the
-    user and return them in a dictionary keyed by course key.
-
-    Arguments:
-        user (User): The user to authenticate as when requesting programs.
-        user_enrolled_courses (list): List of course keys representing the courses in which
-            the given user has active enrollments.
-
-    Returns:
-        dict, containing programs keyed by course.
-    """
-    course_programs = get_programs_for_dashboard(user, user_enrolled_courses)
-    programs_data = {}
-
-    for course_key, programs in course_programs.viewitems():
-        for program in programs:
-            if program.get('status') == 'active' and program.get('category') == 'xseries':
-                try:
-                    programs_for_course = programs_data.setdefault(course_key, {})
-                    programs_for_course.setdefault('course_program_list', []).append({
-                        'course_count': len(program['course_codes']),
-                        'display_name': program['name'],
-                        'program_id': program['id'],
-                        'program_marketing_url': urljoin(
-                            settings.MKTG_URLS.get('ROOT'),
-                            'xseries' + '/{}'
-                        ).format(program['marketing_slug'])
-                    })
-                    programs_for_course['category'] = program.get('category')
-                    programs_for_course['display_category'] = get_display_category(program)
-                except KeyError:
-                    log.warning('Program structure is invalid, skipping display: %r', program)
-
-    return programs_data
-
-
-def _get_xseries_credentials(user):
-    """Return program credentials data required for display on
-    the learner dashboard.
-
-    Given a user, find all programs for which certificates have been earned
-    and return list of dictionaries of required program data.
-
-    Arguments:
-        user (User): user object for getting programs credentials.
-
-    Returns:
-        list of dict, containing data corresponding to the programs for which
-        the user has been awarded a credential.
-    """
-    programs_credentials = get_user_program_credentials(user)
-    credentials_data = []
-    for program in programs_credentials:
-        if program.get('category') == 'xseries':
-            try:
-                program_data = {
-                    'display_name': program['name'],
-                    'subtitle': program['subtitle'],
-                    'credential_url': program['credential_url'],
-                }
-                credentials_data.append(program_data)
-            except KeyError:
-                log.warning('Program structure is invalid: %r', program)
-
-    return credentials_data
