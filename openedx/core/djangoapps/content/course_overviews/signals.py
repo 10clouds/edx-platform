@@ -41,11 +41,12 @@ def _create_edevate_course_for_verification(sender, course_key, **kwargs):  # py
     create course on the edevate for verification.
     """
     from cms.djangoapps.contentstore.courseware_index import CourseAboutSearchIndexer
-    from student.models import get_user
+    from student.models import CourseAccessRole, get_user
 
     try:
-        course = modulestore().get_course(course_key)
-        course_author = User.objects.get(pk=course.published_by)
+        course_access_role = CourseAccessRole.objects.get(course_id=course_key,
+                                                          role='instructor')
+        course_author = course_access_role.user
         edevate_db = EdevateDbConnector()
         edevate_db.update_or_create_verification_course(course_key,
                                                         course_author.email)
@@ -64,5 +65,5 @@ def _create_edevate_course_for_verification(sender, course_key, **kwargs):  # py
                                            context)
                 from_address = settings.DEFAULT_FROM_EMAIL
                 user.email_user(subject, message, from_address)
-    except User.DoesNotExist:
+    except CourseAccessRole.DoesNotExist:
         pass
