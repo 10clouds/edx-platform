@@ -1142,6 +1142,7 @@ def update_subscription(request):
         order_datetime = datetime.datetime.strptime(order_date, "%Y-%m-%dT%H:%M:%SZ")
         subscription_until = order_datetime.replace(tzinfo=UTC) + datetime.timedelta(days=settings.SUBSCRIPTOIN_DAYS)
         try:
+            user.subscriber.created = order_datetime.replace(tzinfo=UTC)
             user.subscriber.subscription_until = subscription_until
             user.subscriber.save()
         except Exception as e:
