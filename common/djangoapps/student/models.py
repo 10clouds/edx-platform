@@ -1580,6 +1580,14 @@ def invalidate_enrollment_mode_cache(sender, instance, **kwargs):  # pylint: dis
     cache.delete(cache_key)
 
 
+@receiver(models.signals.post_save, sender=CourseEnrollment)
+def sync_enrollments_with_edevate(sender, instance, **kwargs):
+    if instance.is_active:
+        edevate_db = EdevateDbConnector()
+        edevate_db.update_users_course_list(instance.course_id, instance.user.email)
+        edevate_db.close()
+
+
 class ManualEnrollmentAudit(models.Model):
     """
     Table for tracking which enrollments were performed through manual enrollment.
