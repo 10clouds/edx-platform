@@ -25,6 +25,14 @@ class ProgramsApiConfig(ConfigurationModel):
     internal_service_url = models.URLField(verbose_name=_("Internal Service URL"))
     public_service_url = models.URLField(verbose_name=_("Public Service URL"))
 
+    marketing_path = models.CharField(
+        max_length=255,
+        blank=True,
+        help_text=_(
+            'Path used to construct URLs to programs marketing pages (e.g., "/foo").'
+        )
+    )
+
     authoring_app_js_path = models.CharField(
         verbose_name=_("Path to authoring app's JS"),
         max_length=255,

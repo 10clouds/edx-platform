@@ -1,0 +1,65 @@
+// common - utilities - mixins and extends
+// ====================
+
+// +Font Sizing - Mixin
+// ====================
+@mixin font-size($sizeValue: 16){
+  font-size: $sizeValue + px;
+  font-size: ($sizeValue/10) + rem;
+}
+
+// +Line Height - Mixin
+// ====================
+@mixin line-height($fontSize: auto){
+  line-height: ($fontSize*1.48) + px;
+  line-height: (($fontSize/10)*1.48) + rem;
+}
+
+// +Sizing - Mixin
+// ====================
+@mixin size($width: $baseline, $height: $baseline) {
+  height: $height;
+  width: $width;
+}
+
+
+.is-hidden {
+  display: none;
+}
+
+@function cols($cols) {
+    @return $cols / $grid-column-count * 100%;
+}
+
+// Sets up width and margin properties for an item spanning `$cols` columns in your grid.
+// Defaults to gutters on both sides.
+// Pass the second param (`$margin`) as "before" for a gutter "before" the item (on the left in LTR)
+// or "after" for a gutter "after" the item (on the right in LTR).
+// Pass "none" for no gutters.
+@mixin span($cols, $margin:'') {
+    @include margin-left(calc(0.5 * #{$grid-gutter-width}));
+    @include margin-right(calc(0.5 * #{$grid-gutter-width}));
+    width: calc(#{cols($cols)} - #{$grid-gutter-width});
+
+    @if ($margin == 'before') {
+        @include margin-right(0);
+        width: calc(#{cols($cols)} - 0.5 * #{$grid-gutter-width});
+    } @else if ($margin == 'after') {
+        @include margin-left(0);
+        width: calc(#{cols($cols)} - 0.5 * #{$grid-gutter-width});
+    } @else if ($margin == 'none') {
+        @include margin-left(0);
+        @include margin-right(0);
+        width: cols($cols);
+    }
+}
+
+// Generates $cols worth of invisible columns "before" this item. See the "Basic grid with column shifts" example.
+@mixin pre($cols) {
+    @include margin-left(cols($cols) !important);
+}
+
+// Generates $cols worth of invisible columns "after" this item. See the "Basic grid with column shifts" example.
+@mixin post($cols) {
+    @include margin-right(cols($cols) !important);
+}

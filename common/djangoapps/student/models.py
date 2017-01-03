@@ -1087,7 +1087,7 @@ class CourseEnrollment(models.Model):
         from courseware.access import has_access  # pylint: disable=import-error
         return not has_access(user, 'enroll', course)
 
-    def update_enrollment(self, mode=None, is_active=None, skip_refund=False):
+    def update_enrollment(self, mode=None, is_active=None, skip_refund=True):
         """
         Updates an enrollment for a user in a class.  This includes options
         like changing the mode, toggling is_active True/False, etc.
@@ -1258,7 +1258,7 @@ class CourseEnrollment(models.Model):
 
         # User is allowed to enroll if they've reached this point.
         enrollment = cls.get_or_create_enrollment(user, course_key)
-        enrollment.update_enrollment(is_active=True, mode=mode)
+        enrollment.update_enrollment(is_active=True, mode=mode, skip_refund=True)
         if badges_enabled():
             from lms.djangoapps.badges.events.course_meta import award_enrollment_badge
             award_enrollment_badge(user)

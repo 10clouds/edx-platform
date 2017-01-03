@@ -961,6 +961,7 @@ if settings.FEATURES.get("ENABLE_LTI_PROVIDER"):
 urlpatterns += (
     url(r'config/self_paced', ConfigurationModelCurrentAPIView.as_view(model=SelfPacedConfiguration)),
     url(r'config/programs', ConfigurationModelCurrentAPIView.as_view(model=ProgramsApiConfig)),
+    url(r'programs/', 'learner_dashboard.views.public_program_listing')
 )
 
 urlpatterns = patterns(*urlpatterns)

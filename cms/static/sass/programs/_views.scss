@@ -28,8 +28,10 @@
 
 .app-header {
   @include clearfix();
-  border-bottom: 1px solid palette(grayscale, base);
-  margin-bottom: 20px;
+  float: left;
+  margin: 50px auto;
+  padding: 0 50px;
+  width: 100%;
 }
 
 .course-container {
