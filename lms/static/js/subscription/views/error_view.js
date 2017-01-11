@@ -25,7 +25,7 @@
                 {
                     errorTitle: this.model.get( 'errorTitle' ),
                     errorMsg: this.model.get( 'errorMsg' )
-                }
+                })
             );
 
             $( this.el ).html( renderedHtml );

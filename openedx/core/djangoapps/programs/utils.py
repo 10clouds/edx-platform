@@ -13,6 +13,7 @@ import pytz
 
 from course_modes.models import CourseMode
 from lms.djangoapps.certificates import api as certificate_api
+from lms.djangoapps.commerce.utils import EcommerceService
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
 from openedx.core.djangoapps.programs.models import ProgramsApiConfig
 from openedx.core.lib.edx_api_utils import get_edx_api_data
