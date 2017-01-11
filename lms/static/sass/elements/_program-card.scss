@@ -12,20 +12,9 @@
   border-bottom: none;
   margin-bottom: $baseline;
   position: relative;
-  width: calc(40% - 1rem) !important;
-
-  @media(min-width: $bp-screen-md) {
-    @include span(6, none);
-
-    &:nth-child(2n) {
-      @include span(6, none);
-      width: calc(40% - 1rem) !important;
-    }
-    &:nth-child(2n+1) {
-      @include span(6, none);
-      width: calc(40% - 1rem) !important;
-    }
-  }
+  width: calc(33% - 1rem) !important;
+  float: left !important;
+  margin-right: $baseline/2 !important;
 
   .card-link {
     @include left(0);
@@ -46,12 +35,9 @@
     .banner-image-container {
       position: relative;
       overflow: hidden;
-      height: 166px;
       background: url('../themes/stanford/images/courses_placeholder.png') no-repeat;
       background-position: center;
-      @media(min-width: $bp-screen-sm) { height: 242px; }
-      @media(min-width: $bp-screen-md) { height: 116px; }
-      @media(min-width: $bp-screen-lg) { height: 145px; }
+      height: 145px;
 
       .banner-image {
         @include left(50%);

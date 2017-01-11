@@ -417,12 +417,7 @@ if FEATURES.get('CUSTOM_COURSES_EDX'):
 # Partner support link for CMS footer
 PARTNER_SUPPORT_EMAIL = ENV_TOKENS.get('PARTNER_SUPPORT_EMAIL', PARTNER_SUPPORT_EMAIL)
 
-# Edevate db settings
-EDEVATE_MYSQL_HOST = 'edevate-devel.c60tpezs6h1t.us-east-1.rds.amazonaws.com'
-EDEVATE_MYSQL_PORT = 3306
-EDEVATE_MYSQL_USER = 'edevate_devel'
-EDEVATE_MYSQL_PASSWD = 'edevate12'
-EDEVATE_MYSQL_DB_NAME = 'edevate_devel'
-
-EDEVATE_BASE_URL = 'http://ec2-23-22-165-116.compute-1.amazonaws.com/'
-EDEVATE_AFTER_LOGOUT_URL = '{}university/'.format(EDEVATE_BASE_URL)
+#####################################################################
+# See if the developer has any local overrides.
+if os.path.isfile(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'private.py')):
+    from .private import *  # pylint: disable=import-error,wildcard-import
