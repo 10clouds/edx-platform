@@ -157,6 +157,14 @@ define([
                     return course.key === key && course.display_name === name;
                 });
 
+                for (var i in courseCodes) {
+                    if (courseCodes[i].key == key) {
+                        courseCodes.splice(i,1);
+                        this.programModel.set('course_codes', courseCodes);
+                        break;
+                    }
+                }
+
                 this.programModel.patch({course_codes: update});
             },
 
