@@ -11,6 +11,7 @@ from certificates.models import (
     CertificateTemplate,
     CertificateTemplateAsset,
     GeneratedCertificate,
+    CertificateGenerationCourseSetting,
 )
 
 
@@ -58,8 +59,18 @@ class GeneratedCertificateAdmin(admin.ModelAdmin):
     list_display = ('id', 'course_id', 'mode', 'user')
 
 
+class CertificateGenerationCourseSettingAdmin(admin.ModelAdmin):
+    """
+    Django admin customizations for CertificateGenerationCourseSetting model
+    """
+
+    list_display = ('id', 'course_key', 'enabled')
+
+
 admin.site.register(CertificateGenerationConfiguration)
 admin.site.register(CertificateHtmlViewConfiguration, ConfigurationModelAdmin)
 admin.site.register(CertificateTemplate, CertificateTemplateAdmin)
 admin.site.register(CertificateTemplateAsset, CertificateTemplateAssetAdmin)
 admin.site.register(GeneratedCertificate, GeneratedCertificateAdmin)
+admin.site.register(CertificateGenerationCourseSetting,
+                    CertificateGenerationCourseSettingAdmin)

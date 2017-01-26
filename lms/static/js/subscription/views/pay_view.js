@@ -95,7 +95,9 @@ var edx = edx || {};
             else {
                 // create a button for each payment processor
                 _.each(processors.reverse(), function(processorName) {
-                    $( 'div.payment-buttons' ).append( self._getPaymentButtonHtml(processorName) );
+                    if (processorName.toLowerCase()!='paypal') {
+                        $( 'div.payment-buttons' ).append( self._getPaymentButtonHtml(processorName) );
+                    };
                 });
             }
 
@@ -184,11 +186,7 @@ var edx = edx || {};
                 errorMsg = xhr.responseText;
             }
 
-            this.errorModel.set({
-                errorTitle: gettext( 'Could not submit order' ),
-                errorMsg: errorMsg,
-                shown: true
-            });
+            this.handleError(gettext( 'Could not submit order' ), errorMsg);
 
             // Re-enable the button so the user can re-try
             this.setPaymentEnabled( true );

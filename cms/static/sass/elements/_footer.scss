@@ -6,8 +6,9 @@ $footer-primary-text-color: #1f222b;
     box-shadow: none;
     padding: 20px 0 60px 0;
     text-align: center;
-    background: #0ca8e3;
+    background: $blue;
     font-family: 'titilium' !important;
+    font-size: 16px;
 
     footer {
         max-width: 1170px;

@@ -119,7 +119,12 @@ def send_admin_notification_callback(sender, **kwargs):
     user = kwargs['user']
 
     studio_request_email = settings.FEATURES.get('STUDIO_REQUEST_EMAIL', '')
-    context = {'user_name': user.username, 'user_email': user.email}
+    studio_request_email_to = settings.FEATURES.get('STUDIO_REQUEST_EMAIL_TO', '')
+    studio_domain = settings.CMS_BASE
+    context = {'user_name': user.username,
+               'user_email': user.email,
+               'studio_domain': studio_domain
+               }
 
     subject = render_to_string('emails/course_creator_admin_subject.txt', context)
     subject = ''.join(subject.splitlines())
@@ -130,7 +135,7 @@ def send_admin_notification_callback(sender, **kwargs):
             subject,
             message,
             studio_request_email,
-            [studio_request_email],
+            [studio_request_email_to],
             fail_silently=False
         )
     except SMTPException:

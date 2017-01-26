@@ -1,0 +1,71 @@
+// ------------------------------
+// Programs: Modals
+
+// About: styling for modals.
+.modal-window-overlay {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-color: palette(grayscale, dark);
+  opacity: 0.5;
+  z-index: 1000;
+}
+
+.modal-window {
+  position: absolute;
+  background-color: #fbfbfb;
+  width: 80%;
+  left: 10%;
+  top: 40%;
+  z-index: 1001;
+  border-radius: 4px;
+  border: 10px solid;
+}
+
+.modal-content {
+  margin: 10px;
+  padding: 20px;
+  background-color: transparent;
+  border-radius: 4px;
+
+  .copy {
+    color: #585858;
+  }
+
+  .copy-base {
+    font-size: 1.4rem;
+  }
+
+  .emphasized {
+    color: #585858;
+    font-weight: 600;
+    font-size: 1.6rem;
+  }
+}
+
+.modal-actions {
+  padding: 10px 20px;
+
+  .btn-brand, .btn-neutral {
+    background: transparent;
+    color: #0ca8e3;
+    border-color: #0ca8e3;
+
+    &:hover,
+    &:focus,
+    &:active {
+      background: #0ca8e3;
+      border-color: #0ca8e3;
+      color: white;
+    }
+  }
+}
+
+@include breakpoint( $bp-screen-sm ) {
+  .modal-window {
+    width: 440px;
+    left: calc( 50% - 220px );
+  }
+}

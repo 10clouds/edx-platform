@@ -61,13 +61,13 @@ def _verify_cas2(ticket, service):
         pgtIouId = pgtIouIdElement.text if pgtIouIdElement is not None else None
 
         if pgtIouId:
-            pgtIou = PgtIOU.objects.get(pgtIou = pgtIouId)
+            pgtIou = PgtIOU.objects.get(pgtIou=pgtIouId)
             try:
-                tgt = Tgt.objects.get(username = username)
+                tgt = Tgt.objects.get(username=username)
                 tgt.tgt = pgtIou.tgt
                 tgt.save()
             except ObjectDoesNotExist:
-                Tgt.objects.create(username = username, tgt = pgtIou.tgt)
+                Tgt.objects.create(username=username, tgt=pgtIou.tgt)
 
             pgtIou.delete()
         return username, tree
@@ -127,6 +127,7 @@ class CASBackend(object):
            NB: Use of PT to identify proxy
         """
         username, authentication_response = _verify(ticket, service)
+
         if not username:
             return None
 
@@ -136,6 +137,13 @@ class CASBackend(object):
             u_name = username
             user = User(username=u_name, email=username)
             user.set_unusable_password()
+
+        try:
+            # get user's full name from authentication response(xml tree)
+            user.first_name = authentication_response[0][1].find(CAS + 'first_name').text
+            user.last_name = authentication_response[0][1].find(CAS + 'last_name').text
+        except IndexError:
+            pass
 
         if authentication_response and _CAS_USER_DETAILS_RESOLVER:
             _CAS_USER_DETAILS_RESOLVER(user, authentication_response)

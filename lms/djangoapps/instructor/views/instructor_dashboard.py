@@ -25,7 +25,7 @@ from mock import patch
 from lms.djangoapps.lms_xblock.runtime import quote_slashes
 from openedx.core.lib.xblock_utils import wrap_xblock
 from xmodule.html_module import HtmlDescriptor
-from xmodule.modulestore.django import modulestore
+from xmodule.modulestore.django import modulestore, SignalHandler
 from xmodule.tabs import CourseTab
 from xblock.field_data import DictFieldData
 from xblock.fields import ScopeIds
@@ -148,8 +148,12 @@ def instructor_dashboard_2(request, course_id):
         sections.append(_section_metrics(course, access))
 
     # Gate access to Ecommerce tab
-    if course_mode_has_price and (access['finance_admin'] or access['sales_admin']):
-        sections.append(_section_e_commerce(course, access, paid_modes[0], is_white_label, is_white_label))
+    if access['finance_admin'] or access['sales_admin'] or access['admin']:
+        if course_mode_has_price:
+            paid_mode = paid_modes[0]
+        else:
+            paid_mode = CourseMode.DEFAULT_SHOPPINGCART_MODE
+        sections.append(_section_e_commerce(course, access, paid_mode, is_white_label, is_white_label))
 
     # Gate access to Special Exam tab depending if either timed exams or proctored exams
     # are enabled in the course
@@ -168,7 +172,7 @@ def instructor_dashboard_2(request, course_id):
     # This is used to generate example certificates
     # and enable self-generated certificates for a course.
     certs_enabled = CertificateGenerationConfiguration.current().enabled
-    if certs_enabled and access['admin']:
+    if certs_enabled and (access['admin'] or access['instructor']):
         sections.append(_section_certificates(course))
 
     disable_buttons = not _is_small_course(course_key)
@@ -395,6 +399,9 @@ def set_course_mode_price(request, course_id):
         min_price=course_price,
         currency=currency
     )
+
+    signal_handler = SignalHandler(modulestore())
+    signal_handler.send('course_published', course_key=course_key)
     return JsonResponse({'message': _("CourseMode price updated successfully")})
 
 

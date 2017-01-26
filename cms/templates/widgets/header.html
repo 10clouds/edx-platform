@@ -15,7 +15,7 @@
 
     <ol class="left nav-global list-inline">
       <li class="item">
-        <a href="http://blog.edevate.com">${_('Enterprise')}</a>
+        <a href="http://blog.edevate.com" target="_blank">${_('Enterprise')}</a>
       </li>
       <li class="item">
         <a href="${edevate_base}courses/search/">${_('Certifications')}</a>
@@ -29,10 +29,16 @@
     </ol>
 
     % if user.is_authenticated():
+      <%
+      if user.profile.name:
+          username = user.profile.name
+      else:
+          username = user.username
+      %>
       <div class="nav-account nav-is-signedin nav-dd ui-right" aria-label="${_('Account')}">
         <ol>
           <li class="nav-item nav-account-user">
-            <h3 class="title"><span class="label"><span class="label-prefix sr">${_("Currently signed in as:")}</span><span class="account-username" title="${ user.username }">${ user.username }</span></span> <i class="icon fa fa-caret-down ui-toggle-dd"></i></h3>
+            <h3 class="title"><span class="label"><span class="label-prefix sr">${_("Currently signed in as:")}</span><span class="account-username" title="${ username }">${ username }</span></span> <i class="icon fa fa-caret-down ui-toggle-dd"></i></h3>
 
             <div class="wrapper wrapper-nav-sub">
               <div class="nav-sub">

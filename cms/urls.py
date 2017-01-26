@@ -101,6 +101,11 @@ urlpatterns += patterns(
         'edevate_reindex_course',
         name='edevate_reindex_course'
     ),
+    url(
+        r'^course/{}/delete_course_indexes/$'.format(settings.COURSE_KEY_PATTERN),
+        'delete_course_indexes',
+        name='delete_course_indexes'
+    ),
     url(r'^course/{}?$'.format(settings.COURSE_KEY_PATTERN), 'course_handler', name='course_handler'),
     url(r'^course_notifications/{}/(?P<action_state_id>\d+)?$'.format(settings.COURSE_KEY_PATTERN),
         'course_notifications_handler'),

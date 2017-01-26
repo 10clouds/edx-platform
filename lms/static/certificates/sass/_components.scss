@@ -367,6 +367,7 @@
     .recipient-details {
         @extend %copy-base;
         font-weight: font-weight(semi-bold);
+        width: 100%;
     }
 
     .recipient-name {
@@ -477,10 +478,10 @@
         }
 
         // hide the fancy
-        .accomplishment-signatories .signatory-signature,
-        .accomplishment-type-symbol {
-            display: none;
-        }
+        //.accomplishment-signatories .signatory-signature,
+        //.accomplishment-type-symbol {
+        //    display: none;
+        //}
     }
 }
 

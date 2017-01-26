@@ -1193,13 +1193,3 @@ USERNAME_PATTERN = r'(?P<username>[\w.@+-]+)'
 
 # Partner support link for CMS footer
 PARTNER_SUPPORT_EMAIL = ''
-
-# Subscription course key
-SUBSCRIPTION_COURSE_KEY = 'course-v1:Edevate+SUBSCRIPTION+COURSE'
-SUBSCRIPTOIN_DAYS = 30
-
-EDEVATE_BASE_URL = 'http://ec2-23-22-165-116.compute-1.amazonaws.com/'
-EDEVATE_AFTER_LOGOUT_URL = '{}university/'.format(EDEVATE_BASE_URL)
-ADMIN_VERIFICATION_EMAILS = ['vladimir.sokolovskiy@10clouds.com',
-                             'sergey.kospanov@10clouds.com',
-                             'adam.dziuba@10clouds.com']

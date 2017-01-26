@@ -295,7 +295,9 @@ def _upload_asset(request, course_key):
         ),
         'msg': _('Upload completed')
     }
-
+    from xmodule.modulestore.django import SignalHandler
+    signal_handler = SignalHandler(modulestore())
+    signal_handler.send('course_published', course_key=course_key)
     return JsonResponse(response_payload)
 
 
@@ -328,6 +330,9 @@ def _update_asset(request, course_key, asset_key):
             contentstore().set_attr(asset_key, 'locked', modified_asset['locked'])
             # Delete the asset from the cache so we check the lock status the next time it is requested.
             del_cached_content(asset_key)
+            from xmodule.modulestore.django import SignalHandler
+            signal_handler = SignalHandler(modulestore())
+            signal_handler.send('course_published', course_key=course_key)
             return JsonResponse(modified_asset, status=201)
 
 

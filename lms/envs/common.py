@@ -575,12 +575,7 @@ COURSE_SETTINGS = {
     }
 }
 
-# Subscription course key
-SUBSCRIPTION_COURSE_KEY = 'course-v1:Edevate+SUBSCRIPTION+COURSE'
-SUBSCRIPTOIN_DAYS = 30
-
-OPENEDX_TUTORIAL_URL = 'http://50.97.47.83:18000/courses/course-v1:edX+DemoX+Demo_Course/about'
-CMS_BASE_URL = 'http://50.97.47.83:18010'
+CMS_BASE_URL = 'http://stage-studio.edevate.com'
 
 # IP addresses that are allowed to reload the course, etc.
 # TODO (vshnayder): Will probably need to change as we get real access control in.
@@ -2636,11 +2631,11 @@ COUNTRIES_OVERRIDE = {
 
 # which access.py permission name to check in order to determine if a course is visible in
 # the course catalog. We default this to the legacy permission 'see_exists'.
-COURSE_CATALOG_VISIBILITY_PERMISSION = 'see_exists'
+COURSE_CATALOG_VISIBILITY_PERMISSION = 'enroll'
 
 # which access.py permission name to check in order to determine if a course about page is
 # visible. We default this to the legacy permission 'see_exists'.
-COURSE_ABOUT_VISIBILITY_PERMISSION = 'see_exists'
+COURSE_ABOUT_VISIBILITY_PERMISSION = 'enroll'
 
 
 # Enrollment API Cache Timeout
@@ -2928,9 +2923,3 @@ API_ACCESS_MANAGER_EMAIL = 'api-access@example.com'
 API_ACCESS_FROM_EMAIL = 'api-requests@example.com'
 API_DOCUMENTATION_URL = 'http://edx.readthedocs.org/projects/edx-platform-api/en/latest/overview.html'
 AUTH_DOCUMENTATION_URL = 'http://edx.readthedocs.org/projects/edx-platform-api/en/latest/authentication.html'
-
-EDEVATE_BASE_URL = 'http://ec2-23-22-165-116.compute-1.amazonaws.com/'
-EDEVATE_AFTER_LOGOUT_URL = '{}university/'.format(EDEVATE_BASE_URL)
-ADMIN_VERIFICATION_EMAILS = ['vladimir.sokolovskiy@10clouds.com',
-                             'sergey.kospanov@10clouds.com',
-                             'adam.dziuba@10clouds.com']

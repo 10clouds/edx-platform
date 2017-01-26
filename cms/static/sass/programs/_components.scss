@@ -1,0 +1,145 @@
+// ------------------------------
+// Programs: Components
+
+// About: styling for specific UI components ranging from global to modular.
+
+// #BUTTONS
+// #FORMS
+
+
+// ------------------------------
+// #BUTTONS
+// ------------------------------
+.btn {
+  border: 1px solid $blue;
+  background: transparent;
+  color: $blue;
+  font-size: 1.4rem;
+
+  &:hover,
+  &:focus,
+  &:active {
+    color: $white;
+    background: $blue;
+  }
+
+  &.btn-delete,
+  &.btn-edit {
+    border: none;
+    background: none;
+    color: palette(grayscale, base);
+
+    &:hover,
+    &:focus,
+    &:active {
+      color: $black;
+    }
+  }
+
+  &.full {
+    width: 100%;
+  }
+
+  &.right {
+    @include float(right);
+  }
+
+  &.btn-create {
+    background: transparent;
+    border: 1px solid $blue;
+
+    // STATE: hover and focus
+    &:hover,
+    &.is-hovered,
+    &:focus,
+    &.is-focused {
+      background: $blue;
+      color: $white;
+    }
+
+    // STATE: is pressed or active
+    &:active,
+    &.is-pressed,
+    &.is-active {
+      color: $white;
+      background: blue;
+    }
+
+    .text {
+      margin-left: 5px;
+    }
+  }
+
+  .icon,
+  .text {
+    vertical-align: middle;
+  }
+
+  .icon {
+    font-size: 16px;
+  }
+}
+
+// ------------------------------
+// #FORMS
+// ------------------------------
+.field {
+  .invalid {
+    border: 2px solid palette(error, base);
+  }
+
+  .field-input,
+  .field-hint,
+  .field-message {
+    min-width: 300px;
+    width: 50%;
+    font-size: 1.4rem;
+    padding: 10px;
+
+    &.is-hidden {
+      @extend .is-hidden;
+    }
+  }
+
+  .field-message {
+    padding: 0;
+  }
+
+  .copy {
+    vertical-align: middle;
+    font-size: 1.6rem;
+    color: inherit;
+  }
+}
+
+.field-label {
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+
+.input-select {
+  height: 4.5rem;
+}
+
+.form-group {
+  &.bg-white {
+    background-color: $white;
+    padding: 25px;
+  }
+
+  .field {
+    .field-hint {
+      font-size: 1.2rem;
+      margin: 0;
+      padding: 5px 0;
+    }
+  }
+}
+
+.hd-1.emphasized, .hd-2.emphasized, .hd-3.emphasized, .hd-4.emphasized, 
+.hd-5.emphasized, .hd-6.emphasized, .alert-title {
+    color: #4b4b4b;
+    font-weight: 600;
+    font-size: 2.4rem;
+    margin: 20px 20px;
+}

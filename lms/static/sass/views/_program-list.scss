@@ -1,28 +1,43 @@
+main {
+  outline: none;
+}
+
 .program-list-wrapper {
-  padding: $baseline + px;
+  padding: $baseline * 2;
+}
+
+.collection-title {
+  padding: 15px 0;
+  font-size: 18px;
 }
 
 .program-cards-container {
-  @include span(12);
+  @include span(12, none);
+  float: left;
 
-  @include susy-media($bp-screen-md) {
-    @include span(9);
+  @media(min-width: $bp-screen-md) {
+    @include span(9, none);
+    float: left;
   }
 }
 
-.sidebar {
-  @include span(12);
-  @include float(right);
-  margin-bottom: $baseline + px;
+.public-program-cards-container {
+  @include span(12, none);
+  float: left;
+}
 
-  @include susy-media($bp-screen-md) {
+.sidebar {
+  @include span(12, none);
+  @include float(right);
+  margin-bottom: $baseline;
+
+  @media(min-width: $bp-screen-md) {
     @include span(3);
   }
 
   .aside {
-    padding: $baseline + px;
-    margin-bottom: $baseline + px;
-    background-color: $body-bg;
+    padding: $baseline;
+    margin-bottom: $baseline;
     box-sizing: border-box;
     border: 1px solid $border-color-l3;
   }
@@ -30,7 +45,7 @@
   .program-advertise {
     clear: both;
 
-    .btn-neutral {
+    .new-programs-btn {
       width: 100%;
       text-align: center;
       padding: 10px;
@@ -40,7 +55,7 @@
     .advertise-message {
       font-size: font-size(x-small);
       color: palette(grayscale, black);
-      margin-bottom: $baseline + px;
+      margin-bottom: $baseline;
     }
   }
 
@@ -48,11 +63,11 @@
     .hd-6 {
       color: palette(grayscale, dark);
       font-weight: font-weight(normal);
-      margin-bottom: $baseline + px;
+      margin-bottom: $baseline;
     }
 
     .certificate-link {
-      padding-top: $baseline + px;
+      padding-top: $baseline;
       color: palette(primary, base);
       display: block;
 
@@ -66,43 +81,49 @@
   }
 }
 
+.wrapper-header-empty-programs {
+  border-bottom: 4px solid #f5f5f5;
+  margin-bottom: 20px;
+
+  .header-empty-programs{
+    font-size: 18px;
+  }
+}
+
 .empty-programs-message {
   border: 3px solid $gray-l4;
   background: $gray-l6;
-  padding: ($baseline*2) + px 0;
+  padding: ($baseline*2) 0;
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: $baseline;
 
   .hd-3 {
-    color: $black;
-    margin-bottom: $baseline + px;
+    color: #585858;
+    margin-bottom: $baseline;
+    text-transform: none;
+    font-weight: normal;
   }
 
-  .find-xseries-programs {
-    background: $black;
-    border-color: $black;
-    color: $white;
-
-    .action-xseries-icon {
-      @include float(left);
-      @include margin-right($baseline*0.4 + px);
-
-      display: inline;
-      background: url('#{$static-path}/images/icon-sm-xseries-white.png') no-repeat;
-      background-color: transparent;
-      width: ($baseline*1.1) + px;
-      height: ($baseline*1.1) + px;
-    }
+  a {
+    background: transparent;
+    border: 1px solid $main-color;
+    border-radius: 4px;
+    box-shadow: 0 1px 8px 0 rgba(0,0,0,0.1);
+    box-sizing: border-box;
+    color: $main-color;
+    font-family: "Open Sans",Verdana,Geneva,sans-serif,sans-serif;
+    display: inline-block;
+    letter-spacing: 1px;
+    margin-top: 5px;
+    margin-left: 5px;
+    padding: 15px 20px;
 
     &:active,
-    &:hover,
-    &:focus {
-      background: $white;
-      color: $black;
-
-      .action-xseries-icon {
-        background: url('#{$static-path}/images/icon-sm-xseries-black.png') no-repeat;
-      }
+    &:focus,
+    &:hover {
+      color: $white;
+      background: $main-color;
+      text-decoration: none;
     }
   }
 }

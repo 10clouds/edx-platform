@@ -9,6 +9,10 @@
 
 // ====================
 
+main {
+  min-height: 100vh;
+}
+
 // layout - basic page header
 .wrapper-mast {
   margin: ($baseline*1.5) 0 0 0;
@@ -80,8 +84,7 @@
           // CASE: new/create button
           &.new-button,
           &.button-new {
-            @extend %btn-primary-green;
-            @extend %sizing;
+            @extend %btn-secondary-blue;
           }
         }
       }
