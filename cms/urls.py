@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.conf.urls import patterns, include, url
+from django.views.generic.base import RedirectView
 # There is a course creators admin table.
 from ratelimitbackend import admin
 
@@ -78,7 +79,7 @@ urlpatterns += patterns(
 urlpatterns += patterns(
     'contentstore.views',
 
-    url(r'^$', 'howitworks', name='homepage'),
+    url(r'^$', RedirectView.as_view(url='/home/', permanent=True), name='homepage'),
     url(r'^howitworks$', 'howitworks'),
     url(r'^signup$', 'signup', name='signup'),
     url(r'^signin$', 'login_page', name='login'),
