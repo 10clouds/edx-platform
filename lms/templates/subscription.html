@@ -42,7 +42,7 @@ from microsite_configuration.templatetags.microsite import platform_name
               % if is_active_subscription and is_subscription_course_enrolled:
                 <a id="unenroll-0" href="#unenroll-modal" class="action-unenroll enter-course" rel="leanModal">Cancel<span class="sr">&nbsp;</span></a>
               % elif not is_active_subscription and not is_subscription_course_enrolled:
-                <a href="${reverse('subscribe_student')}" class="enter-course">Subscribe<span class="sr">&nbsp;</span></a>
+                <a href="${settings.ECOMMERCE_PUBLIC_URL_ROOT}/login/edx-oidc/?next=/openedx_subscription/" class="enter-course">Subscribe<span class="sr">&nbsp;</span></a>
               % endif
             </div>
           </div>
