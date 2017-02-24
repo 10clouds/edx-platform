@@ -92,7 +92,10 @@ def send_user_notification_callback(sender, **kwargs):
     updated_state = kwargs['state']
 
     studio_request_email = settings.FEATURES.get('STUDIO_REQUEST_EMAIL', '')
-    context = {'studio_request_email': studio_request_email}
+    studio_domain = settings.CMS_BASE
+    context = {'studio_request_email': studio_request_email,
+               'studio_domain': studio_domain
+               }
 
     subject = render_to_string('emails/course_creator_subject.txt', context)
     subject = ''.join(subject.splitlines())
