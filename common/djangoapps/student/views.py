@@ -779,10 +779,19 @@ def dashboard(request):
 
 def subscription_page(request):
     subscription_course_key = CourseKey.from_string(unicode(settings.SUBSCRIPTION_COURSE_KEY))
+    is_active_subscription = request.user.subscriber.is_active_subscription
+    is_subscription_course_enrolled = CourseEnrollment.is_enrolled(request.user, subscription_course_key)
+
+    # Deactivate subscription enrollment if subscription was cancelled by user
+    if not is_active_subscription and is_subscription_course_enrolled:
+        course_enrollment = CourseEnrollment.get_enrollment(request.user, subscription_course_key)
+        course_enrollment.deactivate()
+        is_subscription_course_enrolled = False
+
     context = {
-        'is_active_subscription': request.user.subscriber.is_active_subscription,
+        'is_active_subscription': is_active_subscription,
         'subscription_course_key': settings.SUBSCRIPTION_COURSE_KEY,
-        'is_subscription_course_enrolled': CourseEnrollment.is_enrolled(request.user, subscription_course_key)
+        'is_subscription_course_enrolled': is_subscription_course_enrolled
     }
     return render_to_response('subscription.html', context)
 
