@@ -122,7 +122,7 @@ def send_admin_notification_callback(sender, **kwargs):
     user = kwargs['user']
 
     studio_request_email = settings.FEATURES.get('STUDIO_REQUEST_EMAIL', '')
-    studio_request_email_to = settings.FEATURES.get('STUDIO_REQUEST_EMAIL_TO', '')
+    studio_request_email_to = settings.FEATURES.get('STUDIO_REQUEST_EMAIL_TO', [])
     studio_domain = settings.CMS_BASE
     context = {'user_name': user.username,
                'user_email': user.email,
@@ -138,7 +138,7 @@ def send_admin_notification_callback(sender, **kwargs):
             subject,
             message,
             studio_request_email,
-            [studio_request_email_to],
+            studio_request_email_to,
             fail_silently=False
         )
     except SMTPException:
